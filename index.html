@@ -5,14 +5,16 @@
 
 /* Staff management */
 .navbar{display:flex;gap:9px;margin:0 0 16px}.navbtn.active{background:#167652;border-color:#239769;font-weight:700}.staff-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:16px}.staff-list{max-height:660px;overflow:auto}.staff-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 8px;border-bottom:1px solid var(--line)}.staff-item.selected{background:#1b3936}.staff-item button{flex-shrink:0}.staff-meta{font-size:11px;color:var(--muted)}.staff-inactive{opacity:.65}.staff-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.staff-quals{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:7px}.staff-quals label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:12px;font-weight:500;margin:0}.staff-quals input{width:auto;accent-color:#2cc48b}.staff-note{padding:9px 11px;background:#142b2a;border:1px solid #316057;border-radius:8px;color:#aee6d2;font-size:12px}.danger-btn{border-color:#9a5555;color:#ffc9c9}.staff-actions{display:flex;flex-wrap:wrap;gap:8px}#staffSearch{max-width:380px}@media(max-width:800px){.staff-layout{grid-template-columns:1fr}.staff-fields{grid-template-columns:1fr}}
-@media print{.navbar,#staffView{display:none!important}#calendarView{display:block!important}}
+@media print{.navbar,#staffView,#availabilityView{display:none!important}#calendarView{display:block!important}}
+/* Availability request calendar */
+.avail-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}.avail-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.avail-date{min-height:66px;text-align:left;padding:8px;background:#142630;border:1px solid var(--line);border-radius:9px}.avail-date.selected{background:#5d3629;border-color:#edb75f}.avail-date.recorded{border-color:#e59a66;background:#342923}.avail-date:disabled{opacity:.3}.avail-date small{display:block;color:#e9c5aa;font-size:10px}.avail-actions{display:flex;gap:8px;flex-wrap:wrap}.flag{display:inline-block;background:#6c3b1b;color:#ffe1b7;padding:2px 6px;border-radius:5px;font-weight:800;font-size:10px}.mini.unavailable{background:#5d3323;border-left-color:#ffb15f}.shift.unavailable{border-color:#ffb15f;background:#432b22}.selected-caption{color:#e8c7a2;font-weight:600} @media(max-width:850px){.avail-layout{grid-template-columns:1fr}}@media(max-width:500px){.avail-grid{gap:3px}.avail-date{padding:5px;min-height:55px;font-size:11px}}@media print{#availabilityView{display:none!important}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
-<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button></nav>
+<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button></nav>
 <div id="calendarView">
 <div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
-<h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
+<h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
 <section id="staffView" class="hidden no-print" aria-label="Staff management">
  <div class="toolbar"><div><h2>Staff Management</h2><p>Manage the employee directory and qualified positions for both courses.</p></div><button class="primary" id="addStaffBtn" type="button">+ Add Employee</button></div>
  <div class="staff-layout">
@@ -30,31 +32,44 @@
   </section>
  </div>
 </section>
+<section id="availabilityView" class="hidden no-print" aria-label="My availability">
+ <div class="toolbar"><div><h2>My Availability</h2><p>Tap every day you cannot work, then submit those dates. Managers see the requests when scheduling.</p></div><div class="controls"><button id="availPrev" type="button">◀</button><strong id="availMonth"></strong><button id="availNext" type="button">▶</button></div></div>
+ <div class="avail-layout"><section class="card"><p id="availIdentity" class="small"></p><div id="availGrid" class="avail-grid"></div><p class="small">Orange = saved unavailable date. Highlighted = selected for submission. Submitted dates are treated as unavailable until cleared.</p></section>
+ <aside class="card"><h2>Submit days off</h2><p id="availSelectedCount" class="selected-caption">Select one or more days on the calendar.</p>
+ <form id="availForm" class="stack"><div><label for="availType">Unavailable for</label><select id="availType"><option value="all">Entire day</option><option value="partial">Specific hours</option></select></div><div id="availHours" class="controls hidden"><div><label for="availStart">From</label><input id="availStart" type="time" value="07:00"></div><div><label for="availEnd">To</label><input id="availEnd" type="time" value="17:00"></div></div><button class="primary" type="submit">Submit selected dates</button><button id="availClear" type="button">Clear selection</button><div id="availMessage" class="status" role="status"></div></form>
+ <h2 style="margin-top:18px">Saved requests</h2><div id="savedAvail"></div><p class="small">To remove a submitted date, use Remove. A pending request cannot override an existing published shift; contact the manager if already scheduled.</p></aside></div>
+</section>
 </section></main>
 <script type="module">
 import { supabase } from './supabase.js';
 const el=id=>document.getElementById(id), dateStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false;
+const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[];
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
-async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await reload()}
+async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload()}
 async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};await enterApp()}catch(e){message('loginMessage',e.message,true)}}
 el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
-async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
-function updateEligibleEmployees(){
- const position=el('position').value;
- const previous=el('employee').value;
- // Strict qualification-based filtering. No assignment unless specifically qualified.
- const qualified = new Set(qualifications.filter(q=>q.position_id===position).map(q=>q.employee_id));
- const choices=employees.filter(e=>qualified.has(e.id));
- fillSelect('employee',choices,'Open shift (unassigned)');
- if(choices.some(e=>e.id===previous)) el('employee').value=previous;
- el('eligibleHint').textContent=position?`${choices.length} qualified employees available for this position (before availability/time checks).`:'Select a position to see qualified employees.';
+async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status,notes',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
+function unavailableFor(employeeId,day,start,end){
+ return availability.some(a=>a.employee_id===employeeId && a.unavailable_date===day &&
+  (a.all_day || overlap(start,end,a.start_time,a.end_time)));
 }
+function updateEligibleEmployees(){
+ const position=el('position').value,previous=el('employee').value,start=el('start').value,end=el('end').value;
+ const qualified=new Set(qualifications.filter(q=>q.position_id===position).map(q=>q.employee_id));
+ const matching=employees.filter(e=>qualified.has(e.id));
+ const choices=matching.filter(e=>!unavailableFor(e.id,selected,start,end));
+ fillSelect('employee',choices,'Open shift (unassigned)');
+ if(choices.some(e=>e.id===previous))el('employee').value=previous;
+ const off=matching.length-choices.length;
+ el('eligibleHint').textContent=position?`${choices.length} qualified employees selectable. ${off} unavailable during these hours.`:'Select a position to see qualified employees.';
+}
+el('start').addEventListener('change',updateEligibleEmployees);
+el('end').addEventListener('change',updateEligibleEmployees);
 el('position').addEventListener('change',()=>{updateCourseSelection();updateEligibleEmployees()});
 function departmentForPosition(id){
  const pos=positions.find(p=>p.id===id);
@@ -92,7 +107,8 @@ function conflictsForDay(items){
  return ids;
 }
 function shiftMarkup(s,conflicts,cssClass=''){
- return `<span class="mini ${cssClass} ${conflicts.has(s.id)?'conflict':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''}</span>`;
+ const unavailable=s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time);
+ return `<span class="mini ${cssClass} ${conflicts.has(s.id)?'conflict':''} ${unavailable?'unavailable':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''} ${unavailable?'⚠ OFF':''}${s.notes?.startsWith('Needs coverage:')?' ⚠ COVERAGE':''}</span>`;
 }
 function groupMarkup(items,group,conflicts){
  const list=items.filter(s=>visibleShift(s)&&(
@@ -121,7 +137,7 @@ function render(){
  }
  el('calendar').innerHTML=html;
  el('calendar').querySelectorAll('[data-day]').forEach(btn=>btn.onclick=()=>{selected=btn.dataset.day;if(!selected.startsWith(`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`))month=new Date(selected+'T12:00:00');render()});
- renderDay();
+ renderDay();updateEligibleEmployees();
 }
 function renderDay(){
  const [y,m,d]=selected.split('-').map(Number);
@@ -131,29 +147,86 @@ function renderDay(){
  el('dayShifts').innerHTML=['shared','East','West'].map(group=>{
   const items=dayItems.filter(s=>group==='shared'?isSharedPosition(s.position_id):!isSharedPosition(s.position_id)&&nameFor(courses,s.course_id)===group);
   const title=group==='shared'?'SHARED — PRO SHOP / CARTS & RANGE':`${group.toUpperCase()} COURSE`;
-  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
+  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>':''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
  }).join('');
  el('dayShifts').querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this shift?'))return;const {error}=await supabase.from('shifts').delete().eq('id',b.dataset.remove);if(error)alert(error.message);else await reload()});
 }
 function overlap(a,b,c,d){return a<d&&c<b}
-el('shiftForm').addEventListener('submit',async e=>{e.preventDefault();const employee=el('employee').value||null,start=el('start').value,end=el('end').value,position=el('position').value,course=isSharedPosition(position)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:el('course').value;if(!course)return message('shiftMessage','Shared course is not set up. Run the included SQL in Supabase first.',true);if(end<=start)return message('shiftMessage','End time must be after start time.',true);if(employee){if(!qualifications.some(q=>q.employee_id===employee&&q.position_id===position))return message('shiftMessage','This employee is not qualified for the selected position.',true);const conflict=shifts.some(s=>s.employee_id===employee&&s.shift_date===selected&&overlap(start,end,s.start_time,s.end_time));if(conflict)return message('shiftMessage','Scheduling conflict: employee already has an overlapping shift.',true);const absent=availability.some(a=>a.employee_id===employee&&a.unavailable_date===selected&&(a.all_day||overlap(start,end,a.start_time,a.end_time)));if(absent)return message('shiftMessage','Employee has an availability conflict.',true)}message('shiftMessage','Saving...');const {error}=await supabase.from('shifts').insert({shift_date:selected,course_id:course,position_id:position,employee_id:employee,start_time:start,end_time:end,status:'draft',created_by:profile.user.id});if(error)return message('shiftMessage',error.message,true);message('shiftMessage','Draft shift added.');await reload()});
+el('shiftForm').addEventListener('submit',async e=>{e.preventDefault();const employee=el('employee').value||null,start=el('start').value,end=el('end').value,position=el('position').value,course=isSharedPosition(position)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:el('course').value;if(!course)return message('shiftMessage','Shared course is not set up. Run the included SQL in Supabase first.',true);if(end<=start)return message('shiftMessage','End time must be after start time.',true);if(employee){if(!qualifications.some(q=>q.employee_id===employee&&q.position_id===position))return message('shiftMessage','This employee is not qualified for the selected position.',true);const conflict=shifts.some(s=>s.employee_id===employee&&s.shift_date===selected&&overlap(start,end,s.start_time,s.end_time));if(conflict)return message('shiftMessage','Scheduling conflict: employee already has an overlapping shift.',true);const absent=unavailableFor(employee,selected,start,end);if(absent)return message('shiftMessage','Employee has an availability conflict.',true)}message('shiftMessage','Saving...');const {error}=await supabase.from('shifts').insert({shift_date:selected,course_id:course,position_id:position,employee_id:employee,start_time:start,end_time:end,status:'draft',created_by:profile.user.id});if(error)return message('shiftMessage',error.message,true);message('shiftMessage','Draft shift added.');await reload()});
 el('prevMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=dateStr(month);reload()};el('nextMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=dateStr(month);reload()};el('todayBtn').onclick=()=>{month=new Date(today.getFullYear(),today.getMonth(),1);selected=dateStr(today);reload()};el('refreshBtn').onclick=reload;el('printBtn').onclick=()=>{printOnly=el('printDepartment').value;render();window.print()};window.addEventListener('afterprint',()=>{printOnly=null;render()});
-el('copyBtn').onclick=async()=>{if(!confirm('Copy shifts from the previous month to this month by weekday occurrence? Only empty matching slots will be added as drafts. Review conflicts before publishing.'))return;const current=monthBounds();const prev=new Date(month.getFullYear(),month.getMonth()-1,1),pStart=dateStr(prev),pEnd=current.from;try{const old=await queryTable('shifts','shift_date,course_id,position_id,employee_id,start_time,end_time',q=>q.gte('shift_date',pStart).lt('shift_date',pEnd).neq('status','cancelled'));const latest=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();const additions=[];for(const s of old){const d=new Date(`${s.shift_date}T12:00:00`);const ordinal=Math.floor((d.getDate()-1)/7);let target=new Date(month.getFullYear(),month.getMonth(),1);target.setDate(1+((d.getDay()-target.getDay()+7)%7)+ordinal*7);if(target.getMonth()!==month.getMonth())continue;const ds=dateStr(target);const targetCourse=isSharedPosition(s.position_id)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:s.course_id;if(!targetCourse)throw new Error('Please run the shared-course SQL first.');if(shifts.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time)||additions.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time))continue;const conflict=[...shifts,...additions].some(x=>x.shift_date===ds&&x.employee_id===s.employee_id&&s.employee_id&&overlap(s.start_time,s.end_time,x.start_time,x.end_time));const absent=availability.some(a=>a.employee_id===s.employee_id&&a.unavailable_date===ds&&(a.all_day||overlap(s.start_time,s.end_time,a.start_time,a.end_time)));additions.push({shift_date:ds,course_id:targetCourse,position_id:s.position_id,employee_id:conflict||absent?null:s.employee_id,start_time:s.start_time,end_time:s.end_time,status:'draft',created_by:profile.user.id})}if(!additions.length)return message('globalMessage','No new shifts to copy.');const {error}=await supabase.from('shifts').insert(additions);if(error)throw error;await reload();message('globalMessage',`Copied ${additions.length} draft shifts. Review all assignments.`)}catch(e){message('globalMessage',e.message,true)}};
+el('copyBtn').onclick=async()=>{if(!confirm('Copy shifts from the previous month to this month by weekday occurrence? Only empty matching slots will be added as drafts. Review conflicts before publishing.'))return;const current=monthBounds();const prev=new Date(month.getFullYear(),month.getMonth()-1,1),pStart=dateStr(prev),pEnd=current.from;try{const old=await queryTable('shifts','shift_date,course_id,position_id,employee_id,start_time,end_time',q=>q.gte('shift_date',pStart).lt('shift_date',pEnd).neq('status','cancelled'));const latest=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();const additions=[];for(const s of old){const d=new Date(`${s.shift_date}T12:00:00`);const ordinal=Math.floor((d.getDate()-1)/7);let target=new Date(month.getFullYear(),month.getMonth(),1);target.setDate(1+((d.getDay()-target.getDay()+7)%7)+ordinal*7);if(target.getMonth()!==month.getMonth())continue;const ds=dateStr(target);const targetCourse=isSharedPosition(s.position_id)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:s.course_id;if(!targetCourse)throw new Error('Please run the shared-course SQL first.');if(shifts.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time)||additions.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time))continue;const conflict=[...shifts,...additions].some(x=>x.shift_date===ds&&x.employee_id===s.employee_id&&s.employee_id&&overlap(s.start_time,s.end_time,x.start_time,x.end_time));const absent=s.employee_id&&unavailableFor(s.employee_id,ds,s.start_time,s.end_time);const reason=absent?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} is unavailable`:conflict?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} already assigned`:null;additions.push({shift_date:ds,course_id:targetCourse,position_id:s.position_id,employee_id:conflict||absent?null:s.employee_id,start_time:s.start_time,end_time:s.end_time,status:'draft',notes:reason,created_by:profile.user.id})}if(!additions.length)return message('globalMessage','No new shifts to copy.');const {error}=await supabase.from('shifts').insert(additions);if(error)throw error;await reload();message('globalMessage',`Copied ${additions.length} draft shifts. Review all assignments.`)}catch(e){message('globalMessage',e.message,true)}};
+
+// AVAILABILITY: requests are keyed to the signed-in employee record, never a selectable employee ID.
+async function resolveSelf(){
+ try{const rows=await queryTable('employees','id,full_name,user_id',q=>q.eq('user_id',profile.user.id).limit(1));employeeSelf=rows[0]||null}
+ catch(e){employeeSelf=null;console.warn('Could not resolve employee account',e.message)}
+}
+function availabilityMonths(){const from=dateStr(new Date(availabilityMonth.getFullYear(),availabilityMonth.getMonth(),1)),to=dateStr(new Date(availabilityMonth.getFullYear(),availabilityMonth.getMonth()+1,1));return {from,to}}
+async function loadMyAvailability(){
+ const {from,to}=availabilityMonths();
+ el('availMonth').textContent=availabilityMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+ el('availIdentity').textContent=employeeSelf?`Signed in as ${employeeSelf.full_name}. Tap dates to mark them unavailable.`:'Your account is not linked to an employee record. Ask the manager to connect your Supabase User UID in Staff Management / Supabase.';
+ el('availForm').querySelector('button[type=submit]').disabled=!employeeSelf;
+ if(!employeeSelf){availabilitySelf=[];availabilitySelection.clear();renderAvailability();return}
+ try{availabilitySelf=await queryTable('availability','id,employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.eq('employee_id',employeeSelf.id).gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied').order('unavailable_date'));renderAvailability()}
+ catch(e){message('availMessage',`Unable to load requests: ${e.message}`,true)}
+}
+function renderAvailability(){
+ const m=availabilityMonth,y=m.getFullYear(),mo=m.getMonth();
+ let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="day-head">${d}</div>`).join('');
+ for(let i=0;i<new Date(y,mo,1).getDay();i++)html+='<div></div>';
+ for(let d=1;d<=new Date(y,mo+1,0).getDate();d++){
+  const ds=dateStr(new Date(y,mo,d)),records=availabilitySelf.filter(a=>a.unavailable_date===ds),recorded=records.length>0,selectedDate=availabilitySelection.has(ds);
+  html+=`<button type="button" class="avail-date ${recorded?'recorded':''} ${selectedDate?'selected':''}" data-offday="${ds}" ${!employeeSelf?'disabled':''}>${d}<small>${recorded?(records.some(a=>a.all_day)?'OFF all day':'OFF hours'):selectedDate?'Selected':''}</small></button>`;
+ }
+ el('availGrid').innerHTML=html;
+ el('availGrid').querySelectorAll('[data-offday]').forEach(b=>b.onclick=()=>{const ds=b.dataset.offday;if(availabilitySelection.has(ds))availabilitySelection.delete(ds);else availabilitySelection.add(ds);renderAvailability()});
+ el('availSelectedCount').textContent=availabilitySelection.size?`${availabilitySelection.size} day(s) selected`:'Select one or more days on the calendar.';
+ el('savedAvail').innerHTML=availabilitySelf.length?availabilitySelf.map(a=>`<div class="shift"><b>${safe(a.unavailable_date)}</b> ${a.all_day?'All day':`${clock(a.start_time)}–${clock(a.end_time)}`}<div class="small">${safe(a.status)}</div>${a.status==='submitted'?`<button type="button" data-remove-avail="${safe(a.id)}">Remove</button>`:''}</div>`).join(''):'<p class="small">No unavailable dates saved this month.</p>';
+ el('savedAvail').querySelectorAll('[data-remove-avail]').forEach(b=>b.onclick=async()=>{
+  if(!confirm('Remove this unavailable request?'))return;
+  const {error}=await supabase.from('availability').delete().eq('id',b.dataset.removeAvail).eq('employee_id',employeeSelf.id);
+  if(error)return message('availMessage',`Cannot remove request: ${error.message}. Install the included availability RLS policy.`,true);
+  message('availMessage','Unavailable request removed.');await loadMyAvailability();await reload();
+ });
+}
+el('availPrev').onclick=()=>{availabilityMonth=new Date(availabilityMonth.getFullYear(),availabilityMonth.getMonth()-1,1);availabilitySelection.clear();loadMyAvailability()};
+el('availNext').onclick=()=>{availabilityMonth=new Date(availabilityMonth.getFullYear(),availabilityMonth.getMonth()+1,1);availabilitySelection.clear();loadMyAvailability()};
+el('availClear').onclick=()=>{availabilitySelection.clear();renderAvailability()};
+el('availType').onchange=()=>el('availHours').classList.toggle('hidden',el('availType').value!=='partial');
+el('availForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();if(!employeeSelf)return message('availMessage','Your account is not linked to an employee.',true);
+ const days=[...availabilitySelection].sort();if(!days.length)return message('availMessage','Select at least one date.',true);
+ const all=el('availType').value==='all',start=all?null:el('availStart').value,end=all?null:el('availEnd').value;
+ if(!all&&end<=start)return message('availMessage','End time must be after start time.',true);
+ const existing=new Set(availabilitySelf.map(a=>a.unavailable_date));
+ const toAdd=days.filter(d=>!existing.has(d));if(!toAdd.length)return message('availMessage','Those days already have saved requests. Remove existing requests before changing them.',true);
+ const conflicts=shifts.filter(s=>s.employee_id===employeeSelf.id&&toAdd.includes(s.shift_date)&&(all||overlap(start,end,s.start_time,s.end_time)));
+ if(conflicts.length&&!confirm(`You are already scheduled for ${conflicts.length} of these shifts. Your request will be submitted, but you must contact a manager about those assignments. Continue?`))return;
+ const rows=toAdd.map(d=>({employee_id:employeeSelf.id,unavailable_date:d,all_day:all,start_time:start,end_time:end,status:'submitted'}));
+ message('availMessage','Submitting requests...');const {error}=await supabase.from('availability').insert(rows);
+ if(error)return message('availMessage',error.message,true);
+ availabilitySelection.clear();message('availMessage',`Saved ${rows.length} unavailable day(s). Managers will see scheduling warnings.`);
+ await loadMyAvailability();await reload();
+});
 
 // STAFF MANAGEMENT — manager-only UI backed by RLS-protected Supabase tables.
 const managerAllowed=()=>profile && ['admin','manager'].includes(profile.role);
 function staffMsg(text,bad=false){message('staffMessage',text,bad)}
 function staffView(which){
- const showStaff=which==='staff';
- if(showStaff&&!managerAllowed())return;
- el('calendarView').classList.toggle('hidden',showStaff);
- el('staffView').classList.toggle('hidden',!showStaff);
- el('calendarTab').classList.toggle('active',!showStaff);
- el('staffTab').classList.toggle('active',showStaff);
- if(showStaff)loadStaffManagement();
+ if(which==='staff'&&!managerAllowed())return;
+ el('calendarView').classList.toggle('hidden',which!=='calendar');
+ el('staffView').classList.toggle('hidden',which!=='staff');
+ el('availabilityView').classList.toggle('hidden',which!=='availability');
+ el('calendarTab').classList.toggle('active',which==='calendar');
+ el('staffTab').classList.toggle('active',which==='staff');
+ el('availabilityTab').classList.toggle('active',which==='availability');
+ if(which==='staff')loadStaffManagement();
+ if(which==='availability')loadMyAvailability();
 }
 el('calendarTab').addEventListener('click',()=>staffView('calendar'));
 el('staffTab').addEventListener('click',()=>staffView('staff'));
+el('availabilityTab').addEventListener('click',()=>staffView('availability'));
 function selectedStaffPositions(){return [...el('staffPositionChoices').querySelectorAll('input:checked')].map(x=>x.value)}
 function staffQualificationsFor(id){return qualifications.filter(q=>q.employee_id===id).map(q=>q.position_id)}
 function fillStaffPositionChoices(selectedIds=[]){
