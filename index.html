@@ -13,6 +13,23 @@
 .my-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 18px}.summary-box{background:#162932;border:1px solid var(--line);padding:14px;border-radius:12px}.summary-value{font-size:25px;font-weight:800}.my-shift-card{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);background:#152630;border-radius:11px;margin-bottom:9px}.my-shift-card .title{font-weight:800}.preview-label{color:#f7d796;background:#3b3021;border:1px solid #776033;border-radius:9px;padding:9px 12px;margin-bottom:12px}.navbtn{white-space:nowrap}.navbar{flex-wrap:wrap}.badge-status{font-size:11px;border:1px solid #577364;padding:3px 7px;border-radius:999px;color:#bfe6d7}.badge-status.draft{border-color:#79633a;color:#f1cf91}
 @media(max-width:650px){.my-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-box{padding:8px}.summary-value{font-size:19px}.navbar{gap:5px}.navbtn{font-size:12px;padding:8px}.my-shift-card{flex-direction:column}}
 @media print{#myShiftsView{display:none!important}}
+
+/* Employee schedule: primary calendar plus easy-to-read chronological shifts */
+.my-shifts-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:22px;margin-top:15px}
+.my-schedule-subtitle{font-size:15px;margin:0 0 11px;color:var(--text)}
+.my-shifts-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.my-cal-head{text-align:center;color:var(--muted);font-weight:800;font-size:11px;padding:7px 0}
+.my-cal-day{min-height:92px;background:#13252e;border:1px solid var(--line);border-radius:8px;padding:7px;overflow-wrap:anywhere}
+.my-cal-day.out-of-month{opacity:.25}
+.my-cal-day.has-shift{background:#173b32;border-color:#368d6d}
+.my-cal-day.is-today{outline:2px solid var(--gold)}
+.my-cal-number{font-weight:800;font-size:12px;margin-bottom:5px}
+.my-cal-item{font-size:11px;line-height:1.3;margin-top:4px;border-left:3px solid var(--green);padding:3px 4px;background:#1c4c3e;border-radius:3px}
+.my-cal-item.west{border-left-color:var(--gold)}
+.my-cal-item.draft{border-left-color:#a3a8b8;background:#35404a}
+.my-shifts-empty{color:var(--muted);padding:16px;background:#152630;border:1px solid var(--line);border-radius:9px}
+@media(max-width:1000px){.my-shifts-layout{grid-template-columns:1fr}}
+@media(max-width:550px){.my-shifts-calendar{gap:3px}.my-cal-day{min-height:69px;padding:4px}.my-cal-item{font-size:9px;padding:2px}.my-cal-head{font-size:10px}.my-schedule-subtitle{font-size:14px}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
 <section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Create a password for your employee login.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
@@ -40,7 +57,7 @@
 </section>
 <section id="myShiftsView" class="hidden no-print" aria-label="My scheduled shifts">
  <div class="toolbar"><div><h2>My Shifts</h2><p>Your upcoming assignments for Mercer Oaks, across shared operations and both courses.</p></div><div class="controls"><button type="button" id="myShiftsPrev">◀</button><strong id="myShiftsMonthLabel"></strong><button type="button" id="myShiftsNext">▶</button></div></div>
- <div class="card"><div id="myShiftsIdentity" class="status" role="status"></div><div class="my-summary"><div class="summary-box"><span class="small">Shifts</span><div id="myShiftCount" class="summary-value">0</div></div><div class="summary-box"><span class="small">Hours</span><div id="myHours" class="summary-value">0</div></div><div class="summary-box"><span class="small">Days</span><div id="myDays" class="summary-value">0</div></div></div><div id="myShiftsList"></div><p class="small">Only published or completed shifts appear in the normal employee view. Your manager must publish draft shifts first.</p></div>
+ <div class="card"><div id="myShiftsIdentity" class="status" role="status"></div><div class="my-shifts-layout"><div><h3 class="my-schedule-subtitle">My Monthly Calendar</h3><div id="myShiftsCalendar" class="my-shifts-calendar" aria-label="My monthly shift calendar"></div></div><div><h3 class="my-schedule-subtitle">My Scheduled Shifts</h3><div id="myShiftsList"></div></div></div><p class="small" style="margin-top:14px">Employees see only published or completed shifts. Draft assignments are visible to managers until they are published.</p></div>
 </section>
 <section id="availabilityView" class="hidden no-print" aria-label="My availability">
  <div class="toolbar"><div><h2>My Availability</h2><p>Tap every day you cannot work, then submit those dates. Managers see the requests when scheduling.</p></div><div class="controls"><button id="availPrev" type="button">◀</button><strong id="availMonth"></strong><button id="availNext" type="button">▶</button></div></div>
@@ -224,14 +241,36 @@ el('availForm').addEventListener('submit',async ev=>{
 
 // Self-service view: no employee ID can be chosen by the viewer.
 // RLS still controls data access; only publishable shifts appear for employees.
+function renderMyShiftCalendar(rows){
+ const first=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1);
+ const last=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,0);
+ const offset=first.getDay();
+ const cells=Math.ceil((offset+last.getDate())/7)*7;
+ const start=new Date(first);start.setDate(1-offset);
+ const byDay=new Map();
+ for(const s of rows){if(!byDay.has(s.shift_date))byDay.set(s.shift_date,[]);byDay.get(s.shift_date).push(s)}
+ let markup=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="my-cal-head">${d}</div>`).join('');
+ for(let i=0;i<cells;i++){
+  const day=new Date(start);day.setDate(start.getDate()+i);
+  const key=dateStr(day),inMonth=day.getMonth()===myShiftsMonth.getMonth(),items=inMonth?(byDay.get(key)||[]):[];
+  markup+=`<div class="my-cal-day ${inMonth?'':'out-of-month'} ${items.length?'has-shift':''} ${key===dateStr(today)?'is-today':''}"><div class="my-cal-number">${day.getDate()}</div>`;
+  for(const s of items){
+   const p=positions.find(p=>p.id===s.position_id)?.name||'Shift';
+   const c=courses.find(c=>c.id===s.course_id)?.name||'';
+   const loc=['Pro Shop','Cart Attendant','Range'].includes(p)?'Shared':c;
+   markup+=`<div class="my-cal-item ${loc==='West'?'west':''} ${s.status==='draft'?'draft':''}" title="${safe(p)} · ${safe(loc)} · ${clock(s.start_time)}–${clock(s.end_time)}">${clock(s.start_time)}–${clock(s.end_time)}<div>${safe(p)}${loc==='Shared'?'':` · ${safe(loc)}`}</div></div>`;
+  }
+  markup+='</div>';
+ }
+ el('myShiftsCalendar').innerHTML=markup;
+}
 async function loadMyShifts(){
  const from=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1));
  const to=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1));
  el('myShiftsMonthLabel').textContent=myShiftsMonth.toLocaleDateString('en-US',{month:'short',year:'numeric'});
  if(!employeeSelf){
    el('myShiftsIdentity').textContent='Your login is not linked to an employee. Ask a manager to connect your account.';
-   el('myShiftsList').innerHTML='';
-   ['myShiftCount','myHours','myDays'].forEach(id=>el(id).textContent='—');
+   el('myShiftsList').innerHTML='';renderMyShiftCalendar([]);
    return;
  }
  el('myShiftsIdentity').textContent=`${employeeSelf.full_name} · ${employeePreview?'Preview of your employee portal':'Personal schedule'}`;
@@ -243,19 +282,16 @@ async function loadMyShifts(){
    .order('shift_date',{ascending:true}).order('start_time',{ascending:true});
   if(error)throw error;
   const rows=data||[];
-  const hours=rows.reduce((n,s)=>{const [h,m]=s.start_time.split(':').map(Number),[hh,mm]=s.end_time.split(':').map(Number);return n+(hh*60+mm-h*60-m)/60},0);
-  el('myShiftCount').textContent=String(rows.length);
-  el('myHours').textContent=hours.toFixed(1);
-  el('myDays').textContent=String(new Set(rows.map(s=>s.shift_date)).size);
+  renderMyShiftCalendar(rows);
   el('myShiftsList').innerHTML=rows.length?rows.map(s=>{
    const [y,m,d]=s.shift_date.split('-').map(Number);
-   const date=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+   const date=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
    const p=positions.find(p=>p.id===s.position_id)?.name||'Position';
    const course=courses.find(c=>c.id===s.course_id)?.name||'Course';
    const label=['Pro Shop','Cart Attendant','Range'].includes(p)?'Shared':course;
-   return `<article class="my-shift-card"><div><div class="title">${safe(date)}</div><div>${safe(p)} · ${safe(label)}</div><div>${clock(s.start_time)}–${clock(s.end_time)}</div></div><span class="badge-status ${s.status==='draft'?'draft':''}">${safe(s.status)}</span></article>`;
-  }).join(''):'<p>You have no published shifts scheduled for this month.</p>';
- }catch(e){el('myShiftsList').textContent=`Could not load shifts: ${e.message}`;}
+   return `<article class="my-shift-card"><div><div class="title">${safe(date)}</div><div>${safe(p)} · ${safe(label)}</div><div><b>${clock(s.start_time)}–${clock(s.end_time)}</b></div></div><span class="badge-status ${s.status==='draft'?'draft':''}">${safe(s.status)}</span></article>`;
+  }).join(''):'<p class="my-shifts-empty">No shifts scheduled for this month.</p>';
+ }catch(e){renderMyShiftCalendar([]);el('myShiftsList').textContent=`Could not load shifts: ${e.message}`;}
 }
 el('myShiftsPrev').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()-1,1);loadMyShifts()};
 el('myShiftsNext').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1);loadMyShifts()};
