@@ -32,7 +32,7 @@
 @media(max-width:550px){.my-shifts-calendar{gap:3px}.my-cal-day{min-height:69px;padding:4px}.my-cal-item{font-size:9px;padding:2px}.my-cal-head{font-size:10px}.my-schedule-subtitle{font-size:14px}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
-<section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Create a password for your employee login.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
+<section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Set a password to sign in again later. Your invitation has already verified your email address.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
 <nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
 <div id="calendarView">
@@ -75,9 +75,26 @@ const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
 async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
-async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;if(new URLSearchParams(location.hash.substring(1)).get('type')==='invite' && !sessionStorage.getItem('mo_invite_done')){el('loginCard').classList.add('hidden');el('inviteActivation').classList.remove('hidden');return;}try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};await enterApp()}catch(e){message('loginMessage',e.message,true)}}
+async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};if(profile.role==='employee' && user.user_metadata?.mo_password_setup_complete !== true){el('loginCard').classList.add('hidden');el('app').style.display='none';el('inviteActivation').classList.remove('hidden');return;}el('inviteActivation').classList.add('hidden');await enterApp()}catch(e){message('loginMessage',e.message,true)}}
 el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
-el('activationForm').addEventListener('submit',async ev=>{ev.preventDefault();const password=el('newPassword').value;if(password!==el('confirmPassword').value)return message('activationMessage','Passwords do not match.',true);message('activationMessage','Saving password...');const {error}=await supabase.auth.updateUser({password});if(error)return message('activationMessage',error.message,true);sessionStorage.setItem('mo_invite_done','1');history.replaceState(null,'',location.pathname);el('inviteActivation').classList.add('hidden');await initialize()});
+el('activationForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();
+ const password=el('newPassword').value;
+ if(password.length<12)return message('activationMessage','Use at least 12 characters.',true);
+ if(password!==el('confirmPassword').value)return message('activationMessage','Passwords do not match.',true);
+ const button=el('activationForm').querySelector('button[type="submit"]');button.disabled=true;
+ message('activationMessage','Creating your password...');
+ try{
+   const {error}=await supabase.auth.updateUser({password,data:{mo_password_setup_complete:true}});
+   if(error)throw error;
+   el('newPassword').value='';el('confirmPassword').value='';
+   // Remove invite tokens from the address bar once Supabase has consumed them.
+   history.replaceState(null,'',location.pathname+location.search);
+   el('inviteActivation').classList.add('hidden');
+   await initialize();
+ }catch(error){message('activationMessage',error.message||'Password could not be saved.',true)}
+ finally{button.disabled=false}
+});
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
@@ -451,7 +468,7 @@ el('inviteStaffBtn').addEventListener('click',async ()=>{
  try{
    const {data,error}=await supabase.functions.invoke('invite-employee',{body:{employee_id:staff.id,email}});
    if(error){let detail=error.message;try{const info=await error.context?.json();if(info?.error)detail=info.error;}catch{}throw new Error(detail)}
-   if(!data?.ok)throw new Error(data?.error||'Invitation was not completed.');
+   if(data?.success!==true && data?.ok!==true)throw new Error(data?.error||'Invitation was not completed.');
    staffMsg(`Invitation sent to ${email}. The employee can activate their account from the email link.`);
    await loadStaffManagement();editStaff(staff.id);
  }catch(e){staffMsg(`Invitation failed: ${e.message}`,true)}finally{btn.disabled=false}
