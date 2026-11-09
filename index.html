@@ -8,10 +8,16 @@
 @media print{.navbar,#staffView,#availabilityView{display:none!important}#calendarView{display:block!important}}
 /* Availability request calendar */
 .avail-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}.avail-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.avail-date{min-height:66px;text-align:left;padding:8px;background:#142630;border:1px solid var(--line);border-radius:9px}.avail-date.selected{background:#5d3629;border-color:#edb75f}.avail-date.recorded{border-color:#e59a66;background:#342923}.avail-date:disabled{opacity:.3}.avail-date small{display:block;color:#e9c5aa;font-size:10px}.avail-actions{display:flex;gap:8px;flex-wrap:wrap}.flag{display:inline-block;background:#6c3b1b;color:#ffe1b7;padding:2px 6px;border-radius:5px;font-weight:800;font-size:10px}.mini.unavailable{background:#5d3323;border-left-color:#ffb15f}.shift.unavailable{border-color:#ffb15f;background:#432b22}.selected-caption{color:#e8c7a2;font-weight:600} @media(max-width:850px){.avail-layout{grid-template-columns:1fr}}@media(max-width:500px){.avail-grid{gap:3px}.avail-date{padding:5px;min-height:55px;font-size:11px}}@media print{#availabilityView{display:none!important}}
+
+/* My Shifts / employee-focused mobile portal */
+.my-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 18px}.summary-box{background:#162932;border:1px solid var(--line);padding:14px;border-radius:12px}.summary-value{font-size:25px;font-weight:800}.my-shift-card{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);background:#152630;border-radius:11px;margin-bottom:9px}.my-shift-card .title{font-weight:800}.preview-label{color:#f7d796;background:#3b3021;border:1px solid #776033;border-radius:9px;padding:9px 12px;margin-bottom:12px}.navbtn{white-space:nowrap}.navbar{flex-wrap:wrap}.badge-status{font-size:11px;border:1px solid #577364;padding:3px 7px;border-radius:999px;color:#bfe6d7}.badge-status.draft{border-color:#79633a;color:#f1cf91}
+@media(max-width:650px){.my-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-box{padding:8px}.summary-value{font-size:19px}.navbar{gap:5px}.navbtn{font-size:12px;padding:8px}.my-shift-card{flex-direction:column}}
+@media print{#myShiftsView{display:none!important}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
+<section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Create a password for your employee login.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
-<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button></nav>
+<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
 <div id="calendarView">
 <div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
 <h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
@@ -25,12 +31,16 @@
     <div class="staff-fields"><div><label for="staffEmail">Email (optional)</label><input id="staffEmail" type="email" maxlength="254" autocomplete="off" placeholder="employee@example.com"></div><div><label for="staffPhone">Phone (optional)</label><input id="staffPhone" type="tel" maxlength="50" autocomplete="off" placeholder="Phone number"></div></div>
     <div><label for="staffDepartment">Primary department</label><select id="staffDepartment"><option value="Pro Shop">Pro Shop</option><option value="Starter/Ranger">Starter/Ranger</option><option value="Carts/Range">Carts/Range</option><option value="Management">Management</option><option value="Cross-trained">Cross-trained</option></select></div>
     <div><label>Qualified positions *</label><div id="staffPositionChoices" class="staff-quals"></div><p class="small">Select all jobs the employee is trained to work. These control the shift assignment dropdown.</p></div>
-    <div class="staff-note">Login accounts are separate. Adding an employee here does not send an invitation or create a password.</div>
-    <div class="staff-actions"><button id="saveStaffBtn" type="submit" class="primary">Save Employee</button><button id="staffCancelBtn" type="button">Clear form</button><button id="staffDeactivateBtn" type="button" class="danger-btn hidden">Deactivate Employee</button><button id="staffReactivateBtn" type="button" class="hidden">Reactivate Employee</button></div>
-    <div id="staffMessage" role="status" class="status"></div>
+    <div class="staff-note">Save the employee first. Then select their record and click Invite Employee to send login instructions. Do not invite a manager account as an employee.</div>
+    <div class="staff-actions"><button id="saveStaffBtn" type="submit" class="primary">Save Employee</button><button id="staffCancelBtn" type="button">Clear form</button><button id="inviteStaffBtn" type="button" class="hidden">✉ Invite Employee</button><button id="staffDeactivateBtn" type="button" class="danger-btn hidden">Deactivate Employee</button><button id="staffReactivateBtn" type="button" class="hidden">Reactivate Employee</button></div>
+    <div id="staffMessage" role="status" class="status"></div><p class="small">Invites require a configured Supabase Auth email sender (custom SMTP for addresses outside your Supabase project team).</p>
    </form>
   </section>
  </div>
+</section>
+<section id="myShiftsView" class="hidden no-print" aria-label="My scheduled shifts">
+ <div class="toolbar"><div><h2>My Shifts</h2><p>Your upcoming assignments for Mercer Oaks, across shared operations and both courses.</p></div><div class="controls"><button type="button" id="myShiftsPrev">◀</button><strong id="myShiftsMonthLabel"></strong><button type="button" id="myShiftsNext">▶</button></div></div>
+ <div class="card"><div id="myShiftsIdentity" class="status" role="status"></div><div class="my-summary"><div class="summary-box"><span class="small">Shifts</span><div id="myShiftCount" class="summary-value">0</div></div><div class="summary-box"><span class="small">Hours</span><div id="myHours" class="summary-value">0</div></div><div class="summary-box"><span class="small">Days</span><div id="myDays" class="summary-value">0</div></div></div><div id="myShiftsList"></div><p class="small">Only published or completed shifts appear in the normal employee view. Your manager must publish draft shifts first.</p></div>
 </section>
 <section id="availabilityView" class="hidden no-print" aria-label="My availability">
  <div class="toolbar"><div><h2>My Availability</h2><p>Tap every day you cannot work, then submit those dates. Managers see the requests when scheduling.</p></div><div class="controls"><button id="availPrev" type="button">◀</button><strong id="availMonth"></strong><button id="availNext" type="button">▶</button></div></div>
@@ -43,13 +53,14 @@
 <script type="module">
 import { supabase } from './supabase.js';
 const el=id=>document.getElementById(id), dateStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[];
+const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[],employeePreview=false,myShiftsMonth=new Date(today.getFullYear(),today.getMonth(),1);
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
-async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload()}
-async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};await enterApp()}catch(e){message('loginMessage',e.message,true)}}
+async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
+async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;if(new URLSearchParams(location.hash.substring(1)).get('type')==='invite' && !sessionStorage.getItem('mo_invite_done')){el('loginCard').classList.add('hidden');el('inviteActivation').classList.remove('hidden');return;}try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};await enterApp()}catch(e){message('loginMessage',e.message,true)}}
 el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
+el('activationForm').addEventListener('submit',async ev=>{ev.preventDefault();const password=el('newPassword').value;if(password!==el('confirmPassword').value)return message('activationMessage','Passwords do not match.',true);message('activationMessage','Saving password...');const {error}=await supabase.auth.updateUser({password});if(error)return message('activationMessage',error.message,true);sessionStorage.setItem('mo_invite_done','1');history.replaceState(null,'',location.pathname);el('inviteActivation').classList.add('hidden');await initialize()});
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
@@ -210,23 +221,76 @@ el('availForm').addEventListener('submit',async ev=>{
  await loadMyAvailability();await reload();
 });
 
+
+// Self-service view: no employee ID can be chosen by the viewer.
+// RLS still controls data access; only publishable shifts appear for employees.
+async function loadMyShifts(){
+ const from=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1));
+ const to=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1));
+ el('myShiftsMonthLabel').textContent=myShiftsMonth.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+ if(!employeeSelf){
+   el('myShiftsIdentity').textContent='Your login is not linked to an employee. Ask a manager to connect your account.';
+   el('myShiftsList').innerHTML='';
+   ['myShiftCount','myHours','myDays'].forEach(id=>el(id).textContent='—');
+   return;
+ }
+ el('myShiftsIdentity').textContent=`${employeeSelf.full_name} · ${employeePreview?'Preview of your employee portal':'Personal schedule'}`;
+ el('myShiftsList').textContent='Loading your shifts...';
+ try{
+  const allowed=isEmployeeFacing()?['published','completed']:['draft','published','completed'];
+  const {data,error}=await supabase.from('shifts').select('id,shift_date,course_id,position_id,start_time,end_time,status')
+   .eq('employee_id',employeeSelf.id).gte('shift_date',from).lt('shift_date',to).in('status',allowed)
+   .order('shift_date',{ascending:true}).order('start_time',{ascending:true});
+  if(error)throw error;
+  const rows=data||[];
+  const hours=rows.reduce((n,s)=>{const [h,m]=s.start_time.split(':').map(Number),[hh,mm]=s.end_time.split(':').map(Number);return n+(hh*60+mm-h*60-m)/60},0);
+  el('myShiftCount').textContent=String(rows.length);
+  el('myHours').textContent=hours.toFixed(1);
+  el('myDays').textContent=String(new Set(rows.map(s=>s.shift_date)).size);
+  el('myShiftsList').innerHTML=rows.length?rows.map(s=>{
+   const [y,m,d]=s.shift_date.split('-').map(Number);
+   const date=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+   const p=positions.find(p=>p.id===s.position_id)?.name||'Position';
+   const course=courses.find(c=>c.id===s.course_id)?.name||'Course';
+   const label=['Pro Shop','Cart Attendant','Range'].includes(p)?'Shared':course;
+   return `<article class="my-shift-card"><div><div class="title">${safe(date)}</div><div>${safe(p)} · ${safe(label)}</div><div>${clock(s.start_time)}–${clock(s.end_time)}</div></div><span class="badge-status ${s.status==='draft'?'draft':''}">${safe(s.status)}</span></article>`;
+  }).join(''):'<p>You have no published shifts scheduled for this month.</p>';
+ }catch(e){el('myShiftsList').textContent=`Could not load shifts: ${e.message}`;}
+}
+el('myShiftsPrev').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()-1,1);loadMyShifts()};
+el('myShiftsNext').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1);loadMyShifts()};
+
 // STAFF MANAGEMENT — manager-only UI backed by RLS-protected Supabase tables.
 const managerAllowed=()=>profile && ['admin','manager'].includes(profile.role);
 function staffMsg(text,bad=false){message('staffMessage',text,bad)}
 function staffView(which){
- if(which==='staff'&&!managerAllowed())return;
+ const privileged=managerAllowed()&&!employeePreview;
+ if(which==='staff'&&!privileged)return;
  el('calendarView').classList.toggle('hidden',which!=='calendar');
  el('staffView').classList.toggle('hidden',which!=='staff');
  el('availabilityView').classList.toggle('hidden',which!=='availability');
- el('calendarTab').classList.toggle('active',which==='calendar');
- el('staffTab').classList.toggle('active',which==='staff');
- el('availabilityTab').classList.toggle('active',which==='availability');
+ el('myShiftsView').classList.toggle('hidden',which!=='myshifts');
+ for(const [key,tab] of [['calendar','calendarTab'],['staff','staffTab'],['availability','availabilityTab'],['myshifts','myShiftsTab']])el(tab).classList.toggle('active',which===key);
+ el('managerPanel').classList.toggle('hidden',!privileged);
+ el('copyBtn').classList.toggle('hidden',!privileged);
+ el('staffTab').classList.toggle('hidden',!privileged);
+ el('calendarTab').classList.toggle('hidden',employeePreview||profile.role==='employee');
+ el('roleBadge').textContent=employeePreview?'Employee Preview':profile.role;
+ el('employeePreviewBtn').textContent=employeePreview?'Return to Manager View':'Switch to Employee View';
  if(which==='staff')loadStaffManagement();
  if(which==='availability')loadMyAvailability();
+ if(which==='myshifts')loadMyShifts();
 }
+function isEmployeeFacing(){return employeePreview||profile.role==='employee'}
+el('employeePreviewBtn').addEventListener('click',()=>{
+ if(!managerAllowed())return;
+ employeePreview=!employeePreview;
+ staffView(employeePreview?'myshifts':'calendar');
+});
 el('calendarTab').addEventListener('click',()=>staffView('calendar'));
 el('staffTab').addEventListener('click',()=>staffView('staff'));
 el('availabilityTab').addEventListener('click',()=>staffView('availability'));
+el('myShiftsTab').addEventListener('click',()=>staffView('myshifts'));
 function selectedStaffPositions(){return [...el('staffPositionChoices').querySelectorAll('input:checked')].map(x=>x.value)}
 function staffQualificationsFor(id){return qualifications.filter(q=>q.employee_id===id).map(q=>q.position_id)}
 function fillStaffPositionChoices(selectedIds=[]){
@@ -239,6 +303,7 @@ function clearStaffEditor(){
  el('saveStaffBtn').textContent='Add Employee';
  el('staffDeactivateBtn').classList.add('hidden');
  el('staffReactivateBtn').classList.add('hidden');
+ el('inviteStaffBtn').classList.add('hidden');
  fillStaffPositionChoices();
  staffMsg('');renderStaffList();
 }
@@ -256,7 +321,8 @@ function editStaff(id){
  fillStaffPositionChoices(staffQualificationsFor(id));
  el('staffDeactivateBtn').classList.toggle('hidden',!staff.active);
  el('staffReactivateBtn').classList.toggle('hidden',!!staff.active);
- staffMsg('');renderStaffList();
+ el('inviteStaffBtn').classList.toggle('hidden',!staff.active || !!staff.user_id);
+ staffMsg(staff.user_id?'Employee login already linked.':'');renderStaffList();
 }
 function renderStaffList(){
  const q=el('staffSearch').value.trim().toLowerCase(),showInactive=el('showInactive').checked;
@@ -336,6 +402,24 @@ async function changeStaffActive(active){
  await reload();
  staffMsg(`${target.full_name} ${active?'reactivated':'deactivated'}.`);
 }
+el('inviteStaffBtn').addEventListener('click',async ()=>{
+ if(!managerAllowed() || !editingStaffId)return;
+ const staff=staffMembers.find(x=>x.id===editingStaffId);
+ if(!staff || !staff.active)return staffMsg('Select an active employee.',true);
+ if(staff.user_id)return staffMsg('This employee already has a linked login.',true);
+ const email=el('staffEmail').value.trim().toLowerCase();
+ const saved=staffPrivate.find(x=>x.employee_id===staff.id)?.email?.trim().toLowerCase();
+ if(!email || email!==saved)return staffMsg('Save this employee and their email address before sending the invitation.',true);
+ if(!confirm(`Send a staff login invitation to ${email} for ${staff.full_name}?`))return;
+ const btn=el('inviteStaffBtn');btn.disabled=true;staffMsg('Sending invitation...');
+ try{
+   const {data,error}=await supabase.functions.invoke('invite-employee',{body:{employee_id:staff.id,email}});
+   if(error){let detail=error.message;try{const info=await error.context?.json();if(info?.error)detail=info.error;}catch{}throw new Error(detail)}
+   if(!data?.ok)throw new Error(data?.error||'Invitation was not completed.');
+   staffMsg(`Invitation sent to ${email}. The employee can activate their account from the email link.`);
+   await loadStaffManagement();editStaff(staff.id);
+ }catch(e){staffMsg(`Invitation failed: ${e.message}`,true)}finally{btn.disabled=false}
+});
 el('staffDeactivateBtn').addEventListener('click',()=>changeStaffActive(false));
 el('staffReactivateBtn').addEventListener('click',()=>changeStaffActive(true));
 
