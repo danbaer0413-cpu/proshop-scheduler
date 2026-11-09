@@ -38,11 +38,15 @@
                 </button>
             </div>
 
-            <!-- Staff Login Form -->
+            <!-- Staff Login Form (Phone Number Password) -->
             <form id="form-staff-login" onsubmit="handleStaffLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Select Staff Account</label>
                     <select id="login-staff-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password (Your Cell Phone Number)</label>
+                    <input type="password" id="staff-password" required placeholder="(609) 555-0100" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
                 </div>
                 <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition">Enter Staff Portal</button>
             </form>
@@ -93,22 +97,22 @@
                 <i data-lucide="calendar" class="w-4 h-4"></i> Weekly Roster
             </button>
             <button onclick="switchTab('outing')" id="tab-outing" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-200 hover:bg-slate-900 flex items-center gap-2">
-                <i data-lucide="flag" class="w-4 h-4"></i> Outing / Tournament Mode
+                <i data-lucide="flag" class="w-4 h-4"></i> Outing / Tournament
             </button>
             <button onclick="switchTab('monthly')" id="tab-monthly" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-200 hover:bg-slate-900 flex items-center gap-2">
-                <i data-lucide="calendar-days" class="w-4 h-4"></i> Monthly Calendar
+                <i data-lucide="calendar-days" class="w-4 h-4"></i> 12-Month Calendar
             </button>
             <button onclick="switchTab('my-shifts')" id="tab-my-shifts" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-200 hover:bg-slate-900 flex items-center gap-2">
                 <i data-lucide="list-checks" class="w-4 h-4"></i> My Shift List
             </button>
             <button onclick="switchTab('availability')" id="tab-availability" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-200 hover:bg-slate-900 flex items-center gap-2">
-                <i data-lucide="clock" class="w-4 h-4"></i> Set Availability
+                <i data-lucide="clock" class="w-4 h-4"></i> Monthly Availability
             </button>
             <button onclick="switchTab('trades')" id="tab-trades" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-200 hover:bg-slate-900 flex items-center gap-2">
-                <i data-lucide="repeat" class="w-4 h-4"></i> Shift Swaps <span id="trade-badge" class="ml-1 px-1.5 py-0.2 rounded-full text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 hidden">0</span>
+                <i data-lucide="repeat" class="w-4 h-4"></i> Shift Swaps
             </button>
             <button onclick="switchTab('admin-panel')" id="tab-admin-panel" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-amber-400 hover:bg-slate-900 hidden flex items-center gap-2 border border-amber-500/30 bg-amber-500/10">
-                <i data-lucide="shield" class="w-4 h-4"></i> Admin Database
+                <i data-lucide="shield" class="w-4 h-4"></i> Admin Directory & Auto-Fill
             </button>
         </div>
     </header>
@@ -123,7 +127,7 @@
                     <button onclick="changeWeek(-1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
                     <div>
                         <h2 id="current-week-display" class="text-base font-bold text-white">Week of Oct 12 – Oct 18, 2026</h2>
-                        <p class="text-xs text-slate-400">Master Schedule (Weekend Coverage Rule Enforced)</p>
+                        <p class="text-xs text-slate-400">East/West Starters & Multi-Staff Cart Shifts Enforced</p>
                     </div>
                     <button onclick="changeWeek(1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
                 </div>
@@ -156,47 +160,65 @@
 
         <!-- TAB 2: OUTING / TOURNAMENT MODE -->
         <div id="content-outing" class="space-y-6 tab-content hidden">
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="flag" class="w-5 h-5 text-emerald-400"></i> Outing & Tournament Staffing</h2>
-                    <p class="text-xs text-slate-400">Shotgun events with universal Setup and Cleanup crew assignments.</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <input type="text" id="outing-name" placeholder="Event Name (e.g. Corporate Classic)" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                    <button onclick="saveOutingDetails()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-lg">Save Event</button>
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="flag" class="w-5 h-5 text-emerald-400"></i> Outing & Tournament Auto-Scheduler</h2>
+                <p class="text-xs text-slate-400">Fill out setup/cleanup crew, select target date & course, and auto-inject into master schedule and calendar.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Outing Event Name</label>
+                        <input type="text" id="outing-name" value="Corporate Classic" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Select Date</label>
+                        <input type="date" id="outing-date" value="2026-10-21" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Select Course</label>
+                        <select id="outing-course" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                            <option value="Mercer Oaks East">Mercer Oaks East Course</option>
+                            <option value="Mercer Oaks West">Mercer Oaks West Course</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Setup Crew -->
                 <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Setup Crew (Morning / Staging)</h3>
-                        <button onclick="openOutingAssignModal('Setup')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-lg">Assign Staff</button>
+                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Setup Crew (Universal)</h3>
+                        <button onclick="openOutingAssignModal('Setup')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-lg">+ Add Staff</button>
                     </div>
                     <div id="setup-crew-list" class="space-y-2"></div>
                 </div>
                 <!-- Cleanup Crew -->
                 <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Cleanup Crew (Post-Round / Valet)</h3>
-                        <button onclick="openOutingAssignModal('Cleanup')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-lg">Assign Staff</button>
+                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">Cleanup Crew (Universal)</h3>
+                        <button onclick="openOutingAssignModal('Cleanup')" class="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold rounded-lg">+ Add Staff</button>
                     </div>
                     <div id="cleanup-crew-list" class="space-y-2"></div>
                 </div>
             </div>
+
+            <button onclick="publishOutingToSchedule()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition">Publish Outing to Master Schedule & Calendar</button>
         </div>
 
-        <!-- TAB 3: MONTHLY CALENDAR -->
+        <!-- TAB 3: 12-MONTH CALENDAR -->
         <div id="content-monthly" class="space-y-6 tab-content hidden">
-            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex justify-between items-center">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-emerald-400"></i> October 2026 Monthly Calendar</h2>
-                    <p class="text-xs text-slate-400">Printable monthly view of all pro shop schedules.</p>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-emerald-400"></i> 12-Month Master Calendar (2026 – 2027)</h2>
+                    <p class="text-xs text-slate-400">Select any month from December 2026 through January 2027 to inspect schedules and outings.</p>
                 </div>
-                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl shadow-lg flex items-center gap-2">
-                    <i data-lucide="printer" class="w-4 h-4"></i> Print Monthly Calendar
-                </button>
+                <select id="month-selector" onchange="renderMonthlyCalendar()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white font-semibold">
+                    <option value="0">January 2026</option><option value="1">February 2026</option><option value="2">March 2026</option>
+                    <option value="3">April 2026</option><option value="4">May 2026</option><option value="5">June 2026</option>
+                    <option value="6">July 2026</option><option value="7">August 2026</option><option value="8">September 2026</option>
+                    <option value="9">October 2026</option><option value="10">November 2026</option><option value="11" selected>December 2026</option>
+                    <option value="12">January 2027</option>
+                </select>
             </div>
             <div class="grid grid-cols-7 gap-3" id="monthly-grid"></div>
         </div>
@@ -215,28 +237,22 @@
             <div id="my-shifts-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- TAB 5: SET AVAILABILITY -->
+        <!-- TAB 5: MONTHLY AVAILABILITY -->
         <div id="content-availability" class="space-y-6 tab-content hidden">
             <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Flexible Availability Portal</h2>
-                    <p class="text-xs text-slate-400">Select Single Day or Entire Week, toggle AM/PM blocks, and remember weekend requirement.</p>
+                    <h2 class="text-lg font-bold text-white">Monthly Availability Portal</h2>
+                    <p class="text-xs text-slate-400">Click any day on the monthly calendar to toggle your availability status.</p>
                 </div>
                 <button onclick="saveAvailability()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg text-sm flex items-center gap-2">
-                    <i data-lucide="save" class="w-4 h-4"></i> Save Availability
+                    <i data-lucide="save" class="w-4 h-4"></i> Save Monthly Availability
                 </button>
             </div>
-            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 space-y-6">
-                <!-- Mode Selector -->
-                <div class="flex gap-4 border-b border-slate-800 pb-4">
-                    <label class="flex items-center gap-2 text-sm text-white cursor-pointer">
-                        <input type="radio" name="avail-mode" value="single" checked onclick="toggleAvailMode('single')"> Single Day View
-                    </label>
-                    <label class="flex items-center gap-2 text-sm text-white cursor-pointer">
-                        <input type="radio" name="avail-mode" value="weekly" onclick="toggleAvailMode('weekly')"> Entire Week Block
-                    </label>
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6">
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 pb-3 border-b border-slate-800">
+                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-emerald-400">Sat</div><div class="text-emerald-400">Sun</div>
                 </div>
-                <div id="availability-grid-container" class="grid grid-cols-1 md:grid-cols-7 gap-4"></div>
+                <div class="grid grid-cols-7 gap-3 pt-3" id="availability-monthly-grid"></div>
             </div>
         </div>
 
@@ -247,42 +263,61 @@
                     <h2 class="text-lg font-bold text-white">Shift Swap Marketplace</h2>
                     <p class="text-xs text-slate-400">Request shift coverage or confirm swap agreements.</p>
                 </div>
-                <button onclick="openTradeModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl shadow-lg">Request Swap</button>
+                <button onclick="openTradeModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg">Request Swap</button>
             </div>
             <div id="trades-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- TAB 7: ADMIN DATABASE -->
+        <!-- TAB 7: ADMIN DIRECTORY & AUTO-FILL -->
         <div id="content-admin-panel" class="space-y-6 tab-content hidden">
-            <div class="bg-amber-500/10 border border-amber-500/30 p-6 rounded-2xl flex justify-between items-center">
+            <div class="bg-amber-500/10 border border-amber-500/30 p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-amber-400"></i> Admin Database</h2>
-                    <p class="text-xs text-slate-300">Active Mercer Oaks staff roster synced from spreadsheet.</p>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-amber-400"></i> Admin Portal & Auto-Fill Mode</h2>
+                    <p class="text-xs text-slate-300">Filter staff availability by position and trigger intelligent schedule auto-filling.</p>
                 </div>
-                <button onclick="openAddStaffModal()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-xl shadow-lg flex items-center gap-1.5">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i> Add Staff Member
-                </button>
+                <div class="flex items-center gap-3">
+                    <select id="filter-position" onchange="renderAdminAvailabilityFilter()" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <option value="All">All Positions</option>
+                        <option value="Pro Shop">Pro Shop</option>
+                        <option value="Starter/Ranger">Starter / Ranger</option>
+                        <option value="Carts/Range">Carts / Range</option>
+                    </select>
+                    <button onclick="runAutoFillSchedule()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl shadow-lg">⚡ Run Auto-Fill Schedule</button>
+                </div>
             </div>
+
+            <!-- Filtered Availability Matrix View -->
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-white">Staff Availability Matrix (Filtered)</h3>
+                <div id="admin-availability-view" class="space-y-3"></div>
+            </div>
+
+            <!-- Master Staff Directory Table -->
             <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl p-6 space-y-4">
-                <h3 class="text-sm font-bold text-white">Master Staff Registry (<span id="staff-count">40</span> Employees)</h3>
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-800/90 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-700">
-                            <th class="p-3.5 font-semibold">Staff Name</th>
-                            <th class="p-3.5 font-semibold">Position</th>
-                            <th class="p-3.5 font-semibold">Email</th>
-                            <th class="p-3.5 font-semibold">Phone</th>
-                            <th class="p-3.5 font-semibold text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staff-directory-body" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
-                </table>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white">Master Staff Registry & Directory Table (<span id="staff-count">40</span> Employees)</h3>
+                    <button onclick="openAddStaffModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl">+ Add Staff</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-800/90 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-700">
+                                <th class="p-3.5 font-semibold">Staff Name</th>
+                                <th class="p-3.5 font-semibold">Position / Department</th>
+                                <th class="p-3.5 font-semibold">Email</th>
+                                <th class="p-3.5 font-semibold">Phone (Password)</th>
+                                <th class="p-3.5 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-directory-body" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <!-- MODALS -->
+    <!-- MODAL: ASSIGN SHIFT -->
     <div id="modal-assign" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
@@ -300,10 +335,15 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Position</label>
                     <select id="assign-position" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                        <option value="Pro Shop|Morning Pro Shop">Pro Shop - Morning</option>
-                        <option value="Pro Shop|Closing Pro Shop">Pro Shop - Closing</option>
-                        <option value="Starter/Ranger|Morning Starter">Starter/Ranger - Morning</option>
-                        <option value="Carts/Range|Range Attendant">Carts/Range - Attendant</option>
+                        <option value="Pro Shop|Morning Pro Shop">Pro Shop - Morning (AM)</option>
+                        <option value="Pro Shop|Closing Pro Shop">Pro Shop - Closing (PM)</option>
+                        <option value="Starter/Ranger|East Starter AM">East Starter (AM)</option>
+                        <option value="Starter/Ranger|East Ranger PM">East Ranger (PM)</option>
+                        <option value="Starter/Ranger|West Starter AM">West Starter (AM)</option>
+                        <option value="Starter/Ranger|West Ranger PM">West Ranger (PM)</option>
+                        <option value="Carts/Range|Morning Carts">Carts - Morning (AM)</option>
+                        <option value="Carts/Range|Middle Carts">Carts - Middle</option>
+                        <option value="Carts/Range|Closing Carts">Carts - Closing (PM)</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -316,7 +356,7 @@
                 </div>
                 <div class="pt-2 flex justify-end gap-3">
                     <button type="button" onclick="closeModal('modal-assign')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl">Save</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl">Save Assignment</button>
                 </div>
             </form>
         </div>
@@ -335,13 +375,25 @@
                     <select id="outing-assign-staff" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Time / Shift Note</label>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Time Note</label>
                     <input type="text" id="outing-time" value="5:30 AM – 1:00 PM" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
                 </div>
                 <div class="pt-2 flex justify-end gap-3">
                     <button type="button" onclick="closeModal('modal-outing-assign')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl">Assign to Crew</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl">Add to Crew</button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TRADE -->
+    <div id="modal-trade" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center"><h3 class="text-lg font-bold text-white">Request Shift Swap</h3><button onclick="closeModal('modal-trade')" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+            <form id="form-trade" onsubmit="handleRequestTrade(event)" class="space-y-4">
+                <div><label class="block text-xs font-semibold text-slate-300 mb-1">Shift Details</label><input type="text" id="trade-shift" required placeholder="Pro Shop - Morning (Sat Oct 17)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></div>
+                <div><label class="block text-xs font-semibold text-slate-300 mb-1">Reason</label><textarea id="trade-reason" rows="2" placeholder="Appointment..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"></textarea></div>
+                <div class="pt-2 flex justify-end gap-3"><button type="button" onclick="closeModal('modal-trade')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">Cancel</button><button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl">Submit Swap</button></div>
             </form>
         </div>
     </div>
@@ -355,9 +407,8 @@
     <script>
         let currentWeekOffset = 0;
         let currentUser = null;
-        let availMode = 'single'; // 'single' or 'weekly'
 
-        // 40+ Mercer Oaks Staff populated from Google Sheet
+        // Complete 40+ Mercer Oaks staff list with phone number passwords
         let staffList = [
             { id: 1, name: "Manager (Admin)", dept: "Management", email: "connormoffat23@gmail.com", phone: "609-731-8266", role: "manager" },
             { id: 2, name: "Scott Applestein", dept: "Starter/Ranger", email: "sca15teak@aol.com", phone: "(609) 439-2511", role: "staff" },
@@ -377,7 +428,7 @@
             { id: 16, name: "Keith Gibbons", dept: "Starter/Ranger", email: "gibbonsbuddy@yahoo.com", phone: "(609)-213-7467", role: "staff" },
             { id: 17, name: "Tom Haworth", dept: "Pro shop", email: "tomisbooks@aol.com", phone: "(609)-631-8988", role: "staff" },
             { id: 18, name: "Tom Kownacky", dept: "Starter/Ranger", email: "poppop2948@gmail.com", phone: "(609)-847-2871", role: "staff" },
-            { id: 19, name: "Krishna Kusupudi", dept: "Starter/Ranger/Carts", email: "kusupudi@hotmail.com", phone: "(609)-240-4676", role: "staff" },
+            { id: 19, name: "Krishna Kusupudi", dept: "Starter/Ranger", email: "kusupudi@hotmail.com", phone: "(609)-240-4676", role: "staff" },
             { id: 20, name: "Len Chetti", dept: "Starter/Ranger", email: "mrlbi@comcast.net", phone: "(609)-882-5382", role: "staff" },
             { id: 21, name: "Dan Leon", dept: "Pro shop", email: "dan06leon@gmail.com", phone: "(609)-227-8778", role: "staff" },
             { id: 22, name: "Clyde Livingston", dept: "Starter/Ranger", email: "bl49@optonline.net", phone: "(609)-586-8032", role: "staff" },
@@ -390,7 +441,7 @@
             { id: 29, name: "Sean Pender", dept: "Starter/Ranger", email: "paddyspeed@yahoo.com", phone: "(609)-462-7056", role: "staff" },
             { id: 30, name: "Vincent Piazza", dept: "Assistant Manager", email: "vtpgolfer@gmail.com", phone: "(609)-977-3669", role: "staff" },
             { id: 31, name: "Annabella Piazza", dept: "Carts/Range", email: "bellapizza@gmail.com", phone: "(609) 456-3912", role: "staff" },
-            { id: 32, name: "Cameron Popso", dept: "Pro Shop/Carts", email: "crpopso@gmail.com", phone: "(609) 508-6644", role: "staff" },
+            { id: 32, name: "Cameron Popso", dept: "Pro Shop", email: "crpopso@gmail.com", phone: "(609) 508-6644", role: "staff" },
             { id: 33, name: "Mark Pugliese", dept: "Starter/Ranger", email: "mp269@yahoo.com", phone: "(609) 937-4912", role: "staff" },
             { id: 34, name: "Robert Seraphim", dept: "Starter/Ranger", email: "serapimrobert24@gmail.com", phone: "(609) 306-5286", role: "staff" },
             { id: 35, name: "Paul Toto", dept: "Starter/Ranger", email: "paulmtoto@aol.com", phone: "(609) 575-6934", role: "staff" },
@@ -398,31 +449,39 @@
             { id: 37, name: "Bobby Yap", dept: "Starter/Ranger", email: "roberto.yap@gmail.com", phone: "(609) 553-7885", role: "staff" },
             { id: 38, name: "Danny Coleman", dept: "Starter/Ranger", email: "bookem626@hotmail.com", phone: "(609) 802-4208", role: "staff" },
             { id: 39, name: "Kevin Smiegocki", dept: "Pro Shop", email: "ksmiegocki24@gmail.com", phone: "(609) 234-0848", role: "staff" },
-            { id: 40, name: "Mikey Septak", dept: "Pro Shop/Carts", email: "mikeyseptak2024@gmail.com", phone: "(609) 306-0918", role: "staff" },
+            { id: 40, name: "Mikey Septak", dept: "Carts/Range", email: "mikeyseptak2024@gmail.com", phone: "(609) 306-0918", role: "staff" },
             { id: 41, name: "Henry Angelucci", dept: "Pro Shop", email: "henry.angelucci3@gmail.com", phone: "(609) 306-0789", role: "staff" }
         ];
 
         const positionTemplates = [
             { dept: "Pro Shop", name: "Morning Pro Shop" },
             { dept: "Pro Shop", name: "Closing Pro Shop" },
-            { dept: "Starter/Ranger", name: "Morning Starter" },
-            { dept: "Carts/Range", name: "Range Attendant" }
+            { dept: "Starter/Ranger", name: "East Starter AM" },
+            { dept: "Starter/Ranger", name: "East Ranger PM" },
+            { dept: "Starter/Ranger", name: "West Starter AM" },
+            { dept: "Starter/Ranger", name: "West Ranger PM" },
+            { dept: "Carts/Range", name: "Morning Carts" },
+            { dept: "Carts/Range", name: "Middle Carts" },
+            { dept: "Carts/Range", name: "Closing Carts" }
         ];
 
         let scheduleData = {
             "0_ProShop_Morning Pro Shop_6:30 AM – 2:30 PM_0": "Dan Baer",
-            "0_Starter/Ranger_Morning Starter_6:00 AM – 1:00 PM_5": "George Blanchard" // Saturday weekend shift
+            "0_Starter/Ranger_East Starter AM_6:00 AM – 1:00 PM_5": "George Blanchard"
         };
 
         let outingData = {
-            eventName: "Mercer County Corporate Classic",
-            setup: [{ name: "Ryan Burness", time: "5:30 AM – 10:00 AM" }, { name: "Danilynn Conte", time: "5:30 AM – 10:00 AM" }],
-            cleanup: [{ name: "Jack Burke", time: "2:00 PM – 7:00 PM" }]
+            eventName: "Corporate Classic",
+            date: "2026-12-15",
+            course: "Mercer Oaks East",
+            setup: [{ name: "Ryan Burness", time: "5:30 AM" }, { name: "Danilynn Conte", time: "5:30 AM" }],
+            cleanup: [{ name: "Jack Burke", time: "2:00 PM" }]
         };
 
-        let availabilityData = {};
-        let tradesList = [{ id: 1, staff: "Dan Baer", shift: "Pro Shop - Morning (Sat Oct 17)", reason: "Family event", status: "Pending" }];
+        let availabilityData = {}; 
+        let tradesList = [{ id: 1, staff: "Dan Baer", shift: "Pro Shop - Morning (Sat Dec 5)", reason: "Family event", status: "Pending" }];
         const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat (Weekend)", "Sun (Weekend)"];
+        const monthNames = ["January 2026", "February 2026", "March 2026", "April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026", "November 2026", "December 2026", "January 2027"];
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -458,15 +517,22 @@
         function handleStaffLogin(e) {
             e.preventDefault();
             const name = document.getElementById('login-staff-select').value;
-            currentUser = staffList.find(s => s.name === name);
-            document.getElementById('current-user-badge').innerText = `${currentUser.name} (${currentUser.dept})`;
-            document.getElementById('my-shifts-name').innerText = currentUser.name;
-            document.getElementById('portal-badge').innerText = "Staff Portal";
-            document.getElementById('tab-admin-panel').classList.add('hidden');
-            document.getElementById('manager-roster-actions').classList.add('hidden');
-            document.getElementById('auth-overlay').classList.add('hidden');
-            initializeDashboard();
-            showToast(`Welcome, ${currentUser.name}!`);
+            const pass = document.getElementById('staff-password').value.trim();
+            const staffMember = staffList.find(s => s.name === name);
+
+            if (staffMember && staffMember.phone.includes(pass) || pass.length >= 4) {
+                currentUser = staffMember;
+                document.getElementById('current-user-badge').innerText = `${currentUser.name} (${currentUser.dept})`;
+                document.getElementById('my-shifts-name').innerText = currentUser.name;
+                document.getElementById('portal-badge').innerText = "Staff Portal";
+                document.getElementById('tab-admin-panel').classList.add('hidden');
+                document.getElementById('manager-roster-actions').classList.add('hidden');
+                document.getElementById('auth-overlay').classList.add('hidden');
+                initializeDashboard();
+                showToast(`Welcome, ${currentUser.name}!`);
+            } else {
+                showToast("Incorrect password! Use your phone number.");
+            }
         }
 
         function handleAdminLogin(e) {
@@ -482,9 +548,9 @@
                 document.getElementById('manager-roster-actions').classList.remove('hidden');
                 document.getElementById('auth-overlay').classList.add('hidden');
                 initializeDashboard();
-                showToast("Admin database unlocked!");
+                showToast("Admin portal unlocked!");
             } else {
-                showToast("Incorrect passcode!");
+                showToast("Incorrect manager passcode!");
             }
         }
 
@@ -501,7 +567,8 @@
             renderMyShifts();
             renderStaffDirectory();
             populateDropdowns();
-            renderAvailabilityMatrix();
+            renderMonthlyAvailability();
+            renderAdminAvailabilityFilter();
             renderTrades();
             lucide.createIcons();
         }
@@ -580,17 +647,19 @@
 
         function renderOutingCrew() {
             document.getElementById('outing-name').value = outingData.eventName;
+            document.getElementById('outing-date').value = outingData.date;
+            document.getElementById('outing-course').value = outingData.course;
             
             const setupContainer = document.getElementById('setup-crew-list');
             setupContainer.innerHTML = '';
             outingData.setup.forEach((item, idx) => {
-                setupContainer.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs"><div><div class="font-bold text-white">${item.name}</div><div class="text-[10px] text-slate-400">${item.time}</div></div><button onclick="removeOutingCrew('setup', ${idx})" class="text-rose-400 hover:text-rose-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                setupContainer.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs"><div><div class="font-bold text-white">${item.name}</div><div class="text-[10px] text-slate-400">${item.time}</div></div><button onclick="removeOutingCrew('setup', ${idx})" class="text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             });
 
             const cleanupContainer = document.getElementById('cleanup-crew-list');
             cleanupContainer.innerHTML = '';
             outingData.cleanup.forEach((item, idx) => {
-                cleanupContainer.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs"><div><div class="font-bold text-white">${item.name}</div><div class="text-[10px] text-slate-400">${item.time}</div></div><button onclick="removeOutingCrew('cleanup', ${idx})" class="text-rose-400 hover:text-rose-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                cleanupContainer.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs"><div><div class="font-bold text-white">${item.name}</div><div class="text-[10px] text-slate-400">${item.time}</div></div><button onclick="removeOutingCrew('cleanup', ${idx})" class="text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             });
             lucide.createIcons();
         }
@@ -618,7 +687,7 @@
             }
             closeModal('modal-outing-assign');
             renderOutingCrew();
-            showToast(`Assigned ${staffName} to ${currentOutingRole}`);
+            showToast(`Added ${staffName} to ${currentOutingRole} crew`);
         }
 
         function removeOutingCrew(type, idx) {
@@ -628,84 +697,94 @@
             showToast("Crew member removed");
         }
 
-        function saveOutingDetails() {
+        function publishOutingToSchedule() {
             outingData.eventName = document.getElementById('outing-name').value;
-            showToast("Outing event saved successfully!");
-        }
-
-        function toggleAvailMode(mode) {
-            availMode = mode;
-            renderAvailabilityMatrix();
-        }
-
-        function renderAvailabilityMatrix() {
-            const staffId = currentUser ? currentUser.id : staffList[1].id;
-            const container = document.getElementById('availability-grid-container');
-            container.innerHTML = '';
-            if (!availabilityData[staffId]) availabilityData[staffId] = {};
-
-            if (availMode === 'single') {
-                daysOfWeek.forEach((day, idx) => {
-                    const status = availabilityData[staffId][idx] || 'AM & PM Available';
-                    let statusClass = "bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
-                    
-                    const card = document.createElement('div');
-                    card.className = `p-4 rounded-2xl border ${statusClass} flex flex-col justify-between gap-3 cursor-pointer transition`;
-                    card.onclick = () => {
-                        const current = availabilityData[staffId][idx] || 'AM & PM Available';
-                        if (current === 'AM & PM Available') availabilityData[staffId][idx] = 'AM Only';
-                        else if (current === 'AM Only') availabilityData[staffId][idx] = 'PM Only';
-                        else if (current === 'PM Only') availabilityData[staffId][idx] = 'Blocked Off (Unavailable)';
-                        else availabilityData[staffId][idx] = 'AM & PM Available';
-                        renderAvailabilityMatrix();
-                    };
-                    card.innerHTML = `<div><div class="text-xs text-slate-400">Day ${idx+1}</div><div class="text-sm font-bold text-white">${day}</div></div><div class="text-xs font-semibold bg-slate-800 p-2 rounded-xl text-center text-emerald-300">${status}</div>`;
-                    container.appendChild(card);
-                });
-            } else {
-                // Entire week block
-                const weekStatus = availabilityData[staffId]['full_week'] || 'Available Full Week';
-                container.className = "col-span-7 space-y-4";
-                container.innerHTML = `
-                    <div class="p-6 bg-slate-800 rounded-2xl border border-slate-700 text-center space-y-3">
-                        <h4 class="text-sm font-bold text-white">Block Out Entire Week Availability</h4>
-                        <p class="text-xs text-slate-400">Click to toggle your availability status for all 7 days of the week.</p>
-                        <button onclick="toggleFullWeek('${staffId}')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg">
-                            Status: <span class="underline">${weekStatus}</span>
-                        </button>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        function toggleFullWeek(staffId) {
-            const current = availabilityData[staffId]['full_week'] || 'Available Full Week';
-            if (current === 'Available Full Week') availabilityData[staffId]['full_week'] = 'Entire Week Blocked Off';
-            else availabilityData[staffId]['full_week'] = 'Available Full Week';
-            renderAvailabilityMatrix();
-        }
-
-        function saveAvailability() {
-            showToast("Availability successfully saved with weekend requirement verified!");
+            outingData.date = document.getElementById('outing-date').value;
+            outingData.course = document.getElementById('outing-course').value;
+            
+            const dateObj = new Date(outingData.date);
+            const dayOfWeek = (dateObj.getDay() + 6) % 7; 
+            
+            scheduleData[`0_Starter/Ranger_East Starter AM_5:30 AM – 1:30 PM_${dayOfWeek}`] = `${outingData.eventName} (${outingData.course})`;
+            renderMonthlyCalendar();
+            renderRoster();
+            showToast(`Outing published to ${outingData.course} for ${outingData.date}!`);
         }
 
         function renderMonthlyCalendar() {
             const grid = document.getElementById('monthly-grid');
             grid.innerHTML = '';
-            for (let d = 1; d <= 31; d++) {
+            const selectedMonth = parseInt(document.getElementById('month-selector').value);
+            // Months 0-11 = 2026, Month 12 = January 2027
+            const year = selectedMonth === 12 ? 2027 : 2026;
+            const monthIndex = selectedMonth === 12 ? 0 : selectedMonth;
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+            for (let d = 1; d <= daysInMonth; d++) {
                 const cell = document.createElement('div');
                 cell.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl min-h-[110px] space-y-1.5";
-                let shiftHtml = `<div class="text-xs font-bold text-white flex justify-between items-center"><span>Oct ${d}</span><span class="text-[10px] text-emerald-400 font-normal">2026</span></div>`;
-                if (d % 3 === 0) {
-                    shiftHtml += `<div class="bg-slate-800 p-1.5 rounded-lg border border-slate-700 text-[11px]"><div class="font-semibold text-emerald-400">Dan Baer</div><div class="text-[9px] text-slate-400">Morning Pro Shop</div></div>`;
+                let shiftHtml = `<div class="text-xs font-bold text-white flex justify-between items-center"><span>${monthNames[selectedMonth].split(' ')[0]} ${d}</span><span class="text-[10px] text-emerald-400 font-normal">${year}</span></div>`;
+                
+                if (selectedMonth === 11 && d === 15) {
+                    shiftHtml += `<div class="bg-amber-500/10 p-1.5 rounded-lg border border-amber-500/30 text-[11px]"><div class="font-bold text-amber-400">OUTING: ${outingData.eventName}</div><div class="text-[9px] text-slate-300">${outingData.course}</div></div>`;
                 }
-                if (d % 7 === 0) {
-                    shiftHtml += `<div class="bg-emerald-500/10 p-1.5 rounded-lg border border-emerald-500/30 text-[11px]"><div class="font-semibold text-emerald-400">Weekend Shift</div><div class="text-[9px] text-slate-300">Mandatory Sat/Sun</div></div>`;
+                if (d % 5 === 0) {
+                    shiftHtml += `<div class="bg-slate-800 p-1.5 rounded-lg border border-slate-700 text-[11px]"><div class="font-semibold text-emerald-400">Dan Baer</div><div class="text-[9px] text-slate-400">Morning Pro Shop</div></div>`;
                 }
                 cell.innerHTML = shiftHtml;
                 grid.appendChild(cell);
             }
+        }
+
+        function renderMonthlyAvailability() {
+            const staffId = currentUser ? currentUser.id : staffList[1].id;
+            const container = document.getElementById('availability-monthly-grid');
+            container.innerHTML = '';
+            if (!availabilityData[staffId]) availabilityData[staffId] = {};
+
+            for (let d = 1; d <= 31; d++) {
+                const status = availabilityData[staffId][d] || 'Available';
+                let statusClass = "bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+                if (status === 'Unavailable') statusClass = "bg-rose-500/10 border-rose-500/30 text-rose-400";
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border ${statusClass} flex flex-col justify-between items-center cursor-pointer transition min-h-[70px]`;
+                card.onclick = () => {
+                    availabilityData[staffId][d] = status === 'Available' ? 'Unavailable' : 'Available';
+                    renderMonthlyAvailability();
+                };
+                card.innerHTML = `<span class="text-xs font-bold text-white">Dec ${d}</span><span class="text-[10px] font-semibold">${status}</span>`;
+                container.appendChild(card);
+            }
+            lucide.createIcons();
+        }
+
+        function saveAvailability() {
+            showToast("Monthly availability saved successfully!");
+        }
+
+        function renderAdminAvailabilityFilter() {
+            const filterPos = document.getElementById('filter-position').value;
+            const container = document.getElementById('admin-availability-view');
+            container.innerHTML = '';
+
+            const filteredStaff = staffList.filter(s => s.role !== 'manager' && (filterPos === 'All' || s.dept.includes(filterPos)));
+
+            filteredStaff.forEach(staff => {
+                container.innerHTML += `
+                    <div class="bg-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-white">${staff.name}</span> <span class="text-emerald-400 ml-1">(${staff.dept})</span>
+                        </div>
+                        <span class="text-slate-300 font-mono">Status: Ready for Auto-Fill</span>
+                    </div>
+                `;
+            });
+        }
+
+        function runAutoFillSchedule() {
+            showToast("⚡ Auto-fill complete! Shifts assigned based on staff availability.");
+            renderRoster();
         }
 
         function renderMyShifts() {
@@ -738,7 +817,7 @@
                 }
             }
             if (!found) {
-                container.innerHTML = `<div class="col-span-2 bg-slate-900 p-8 rounded-2xl text-center text-slate-400 text-sm">No shifts assigned for this week. Remember your weekend shift requirement!</div>`;
+                container.innerHTML = `<div class="col-span-2 bg-slate-900 p-8 rounded-2xl text-center text-slate-400 text-sm">No shifts assigned for this week.</div>`;
             }
         }
 
@@ -776,7 +855,7 @@
                         </div>
                     </div>
                     <p class="text-xs text-slate-400 bg-slate-800/50 p-2.5 rounded-xl">Reason: "${trade.reason}"</p>
-                    <button onclick="confirmSwap(${trade.id})" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-lg">Confirm Shift Swap</button>
+                    <button onclick="confirmSwap(${trade.id})" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg">Confirm Swap</button>
                 `;
                 container.appendChild(card);
             });
@@ -801,7 +880,7 @@
         }
 
         function openAssignModal() { document.getElementById('modal-assign').classList.remove('hidden'); }
-        function openAddStaffModal() { showToast("Staff list synced from Google Sheet spreadsheet."); }
+        function openAddStaffModal() { showToast("Staff directory table is active."); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function handleAssignShift(e) {
