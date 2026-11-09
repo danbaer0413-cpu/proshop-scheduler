@@ -16,32 +16,11 @@ function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
 async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();await reload()}
 async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};await enterApp()}catch(e){message('loginMessage',e.message,true)}}
-el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()});
+el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
 async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('course',courses);fillSelect('position',positions);updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
-function updateEligibleEmployees(){
- const position=el('position').value;
- const previous=el('employee').value;
- // Strict qualification-based filtering. No assignment unless specifically qualified.
- const qualified = new Set(qualifications.filter(q=>q.position_id===position).map(q=>q.employee_id));
- const choices=employees.filter(e=>qualified.has(e.id));
- fillSelect('employee',choices,'Open shift (unassigned)');
- if(choices.some(e=>e.id===previous)) el('employee').value=previous;
- el('eligibleHint').textContent=position?`${choices.length} qualified employees available for this position (before availability/time checks).`:'Select a position to see qualified employees.';
-}
-el('position').addEventListener('change',updateEligibleEmployees);
-function departmentForPosition(id){
- const pos=positions.find(p=>p.id===id);
- if(!pos)return null;
- const n=pos.name.toLowerCase();
- if(n==='pro shop')return 'pro';
- if(n==='cart attendant'||n==='range')return 'carts';
- if(n==='starter'||n==='ranger')return 'starter';
- return 'other';
-}
-function visibleShift(s){return !printOnly||printOnly==='all'||departmentForPosition(s.position_id)===printOnly}
 function updateEligibleEmployees(){
  const position=el('position').value;
  const previous=el('employee').value;
