@@ -36,7 +36,17 @@
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
 <nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
 <div id="calendarView">
-<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
+<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="copyDayBtn" type="button">Copy Day / Department</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
+<section id="copyDayPanel" class="card no-print hidden" style="margin:0 0 14px" aria-label="Copy scheduled shifts from one date to another">
+ <div class="topline"><h2>Copy a day or just one team</h2><button type="button" id="closeCopyDay">Close</button></div>
+ <p class="small">The day selected on the calendar is the source. Copy the entire day, or only one position group. East and West starter/ranger shifts are included together.</p>
+ <form id="copyDayForm" class="stack" style="margin-top:12px">
+  <div class="controls"><div style="flex:1;min-width:170px"><label for="copySourceDate">Copy from</label><input id="copySourceDate" type="date" required></div><div style="flex:1;min-width:170px"><label for="copyDestinationDate">Copy to</label><input id="copyDestinationDate" type="date" required></div></div>
+  <div><label for="copyScope">Which shifts?</label><select id="copyScope"><option value="all">Entire day — all positions</option><option value="pro">Pro Shop only (shared)</option><option value="carts">Cart Kids / Carts &amp; Range only (shared)</option><option value="starter">Starters only (East &amp; West)</option><option value="ranger">Rangers only (East &amp; West)</option><option value="field">Starters &amp; Rangers (East &amp; West)</option></select></div>
+  <div class="controls"><button type="button" id="copyNextWeek">Set destination to next week</button><button type="submit" class="primary" id="confirmCopyDay">Copy selected shifts</button></div>
+  <div id="copyDayMessage" role="status" class="status"></div>
+ </form>
+</section>
 <h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
 <section id="staffView" class="hidden no-print" aria-label="Staff management">
  <div class="toolbar"><div><h2>Staff Management</h2><p>Manage the employee directory and qualified positions for both courses.</p></div><button class="primary" id="addStaffBtn" type="button">+ Add Employee</button></div>
@@ -74,7 +84,7 @@ const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
-async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
+async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyDayBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
 async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};if(profile.role==='employee' && user.user_metadata?.mo_password_setup_complete !== true){el('loginCard').classList.add('hidden');el('app').style.display='none';el('inviteActivation').classList.remove('hidden');return;}el('inviteActivation').classList.add('hidden');await enterApp()}catch(e){message('loginMessage',e.message,true)}}
 el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
 el('activationForm').addEventListener('submit',async ev=>{
@@ -201,6 +211,78 @@ el('shiftForm').addEventListener('submit',async e=>{e.preventDefault();const emp
 el('prevMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=dateStr(month);reload()};el('nextMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=dateStr(month);reload()};el('todayBtn').onclick=()=>{month=new Date(today.getFullYear(),today.getMonth(),1);selected=dateStr(today);reload()};el('refreshBtn').onclick=reload;el('printBtn').onclick=()=>{printOnly=el('printDepartment').value;render();window.print()};window.addEventListener('afterprint',()=>{printOnly=null;render()});
 el('copyBtn').onclick=async()=>{if(!confirm('Copy shifts from the previous month to this month by weekday occurrence? Only empty matching slots will be added as drafts. Review conflicts before publishing.'))return;const current=monthBounds();const prev=new Date(month.getFullYear(),month.getMonth()-1,1),pStart=dateStr(prev),pEnd=current.from;try{const old=await queryTable('shifts','shift_date,course_id,position_id,employee_id,start_time,end_time',q=>q.gte('shift_date',pStart).lt('shift_date',pEnd).neq('status','cancelled'));const latest=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();const additions=[];for(const s of old){const d=new Date(`${s.shift_date}T12:00:00`);const ordinal=Math.floor((d.getDate()-1)/7);let target=new Date(month.getFullYear(),month.getMonth(),1);target.setDate(1+((d.getDay()-target.getDay()+7)%7)+ordinal*7);if(target.getMonth()!==month.getMonth())continue;const ds=dateStr(target);const targetCourse=isSharedPosition(s.position_id)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:s.course_id;if(!targetCourse)throw new Error('Please run the shared-course SQL first.');if(shifts.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time)||additions.some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time))continue;const conflict=[...shifts,...additions].some(x=>x.shift_date===ds&&x.employee_id===s.employee_id&&s.employee_id&&overlap(s.start_time,s.end_time,x.start_time,x.end_time));const absent=s.employee_id&&unavailableFor(s.employee_id,ds,s.start_time,s.end_time);const reason=absent?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} is unavailable`:conflict?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} already assigned`:null;additions.push({shift_date:ds,course_id:targetCourse,position_id:s.position_id,employee_id:conflict||absent?null:s.employee_id,start_time:s.start_time,end_time:s.end_time,status:'draft',notes:reason,created_by:profile.user.id})}if(!additions.length)return message('globalMessage','No new shifts to copy.');const {error}=await supabase.from('shifts').insert(additions);if(error)throw error;await reload();message('globalMessage',`Copied ${additions.length} draft shifts. Review all assignments.`)}catch(e){message('globalMessage',e.message,true)}};
 
+// Copy one day, or a single department/position, without replacing the destination schedule.
+function nextWeekDate(day){const d=new Date(day+'T12:00:00');d.setDate(d.getDate()+7);return dateStr(d)}
+function copyScopeMatches(shift,scope){
+ const group=departmentForPosition(shift.position_id);
+ const title=nameFor(positions,shift.position_id).toLowerCase();
+ if(scope==='all')return true;
+ if(scope==='pro'||scope==='carts')return group===scope;
+ if(scope==='field')return title==='starter'||title==='ranger';
+ return title===scope;
+}
+el('copyDayBtn').onclick=()=>{
+ if(!managerAllowed())return;
+ el('copyDayPanel').classList.remove('hidden');
+ el('copySourceDate').value=selected;
+ el('copyDestinationDate').value=nextWeekDate(selected);
+ message('copyDayMessage','Choose what to copy, then review the destination date.');
+};
+el('closeCopyDay').onclick=()=>el('copyDayPanel').classList.add('hidden');
+el('copyNextWeek').onclick=()=>{
+ const source=el('copySourceDate').value;
+ if(source)el('copyDestinationDate').value=nextWeekDate(source);
+};
+el('copyDayForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(!managerAllowed())return message('copyDayMessage','Manager access is required.',true);
+ const from=el('copySourceDate').value,to=el('copyDestinationDate').value,scope=el('copyScope').value;
+ if(!from||!to||from===to)return message('copyDayMessage','Choose two different dates.',true);
+ const btn=el('confirmCopyDay');btn.disabled=true;
+ try{
+  message('copyDayMessage','Checking assignments and employee availability...');
+  const source=await queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status',q=>q.eq('shift_date',from).neq('status','cancelled'));
+  const chosen=source.filter(s=>copyScopeMatches(s,scope));
+  if(!chosen.length)return message('copyDayMessage','There are no shifts of that type on the source date.',true);
+  const [destination,daysOff]=await Promise.all([
+   queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status',q=>q.eq('shift_date',to).neq('status','cancelled')),
+   queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.eq('unavailable_date',to).neq('status','denied'))
+  ]);
+  const sharedCourse=courses.find(c=>c.name.toLowerCase()==='shared');
+  const pending=[];let skipped=0,open=0;
+  for(const s of chosen){
+   const courseId=isSharedPosition(s.position_id)?(sharedCourse?.id||s.course_id):s.course_id;
+   // An existing destination slot always wins; never overwrite it.
+   if([...destination,...pending].some(x=>x.course_id===courseId&&x.position_id===s.position_id&&x.start_time===s.start_time&&x.end_time===s.end_time)){skipped++;continue}
+   let employeeId=s.employee_id,reason=null;
+   if(employeeId){
+    const stillQualified=qualifications.some(q=>q.employee_id===employeeId&&q.position_id===s.position_id);
+    const stillActive=employees.some(e=>e.id===employeeId);
+    const isOff=daysOff.some(a=>a.employee_id===employeeId&&(a.all_day||overlap(s.start_time,s.end_time,a.start_time,a.end_time)));
+    const clashes=[...destination,...pending].some(x=>x.employee_id===employeeId&&overlap(s.start_time,s.end_time,x.start_time,x.end_time));
+    if(isOff||clashes||!stillQualified||!stillActive){
+      reason=`Needs coverage: ${nameFor(employees,employeeId,'full_name')} ${isOff?'is unavailable':clashes?'already has a shift':!stillActive?'is inactive':'is not qualified'}`;
+      employeeId=null;open++;
+    }
+   }
+   pending.push({shift_date:to,course_id:courseId,position_id:s.position_id,employee_id:employeeId,start_time:s.start_time,end_time:s.end_time,status:'draft',notes:reason,created_by:profile.user.id});
+  }
+  if(!pending.length)return message('copyDayMessage',`Nothing to add: ${skipped} matching shift(s) already exist.`);
+  // Save one row at a time: a database validation error cannot silently cancel every other shift.
+  let saved=0;const failures=[];
+  for(const row of pending){
+    const {error}=await supabase.from('shifts').insert(row);
+    if(error)failures.push(`${nameFor(positions,row.position_id)}: ${error.message}`);
+    else saved++;
+  }
+  if(new Date(to+'T12:00:00').getMonth()===month.getMonth()&&new Date(to+'T12:00:00').getFullYear()===month.getFullYear())selected=to;
+  else{month=new Date(to+'T12:00:00');month.setDate(1);selected=to}
+  await reload();
+  message('copyDayMessage',`${saved} shift(s) copied as drafts; ${open} flagged as OPEN for coverage; ${skipped} duplicates skipped.${failures.length?' Some failed: '+failures.join('; '):''}`,!!failures.length);
+ }catch(error){message('copyDayMessage',error.message||'Could not copy this day.',true)}
+ finally{btn.disabled=false}
+});
+
 // AVAILABILITY: requests are keyed to the signed-in employee record, never a selectable employee ID.
 async function resolveSelf(){
  try{const rows=await queryTable('employees','id,full_name,user_id',q=>q.eq('user_id',profile.user.id).limit(1));employeeSelf=rows[0]||null}
@@ -325,7 +407,7 @@ function staffView(which){
  el('myShiftsView').classList.toggle('hidden',which!=='myshifts');
  for(const [key,tab] of [['calendar','calendarTab'],['staff','staffTab'],['availability','availabilityTab'],['myshifts','myShiftsTab']])el(tab).classList.toggle('active',which===key);
  el('managerPanel').classList.toggle('hidden',!privileged);
- el('copyBtn').classList.toggle('hidden',!privileged);
+ el('copyBtn').classList.toggle('hidden',!privileged);el('copyDayBtn').classList.toggle('hidden',!privileged);if(!privileged)el('copyDayPanel').classList.add('hidden');
  el('staffTab').classList.toggle('hidden',!privileged);
  el('calendarTab').classList.toggle('hidden',employeePreview||profile.role==='employee');
  el('roleBadge').textContent=employeePreview?'Employee Preview':profile.role;
