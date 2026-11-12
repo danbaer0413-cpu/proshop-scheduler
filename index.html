@@ -98,7 +98,7 @@
 </section>
 <h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
 <section id="outingsView" class="hidden no-print" aria-label="Outing planning and staffing">
- <div class="toolbar"><div><h2>Outing Mode</h2><p>Plan a special-event day and assign setup, operations, and cleanup staff. Outing shifts automatically appear on the main schedule as drafts.</p></div><button class="primary" id="newOutingBtn" type="button">+ New Outing</button></div>
+ <div class="toolbar"><div><h2>Outing Mode</h2><p>Plan East, West, or BOTH courses using one outing and one roster. Use existing scheduled employees without duplicating their shifts, or add new event shifts.</p></div><button class="primary" id="newOutingBtn" type="button">+ New Outing</button></div>
  <div class="outing-layout">
  <section class="card"><h3>Outings</h3><div id="outingsList" class="outing-list"></div><div id="outingListMsg" class="status small"></div>
  <h3 style="margin-top:20px" id="outingEditorTitle">New outing</h3>
@@ -112,9 +112,14 @@
  <form id="outingShiftForm" class="stack" style="margin-top:15px">
  <div class="staff-fields"><div><label for="outingPhase">Event phase</label><select id="outingPhase"><option value="setup">Setup</option><option value="operations">During outing</option><option value="cleanup">Cleanup</option></select></div><div><label for="outingPosition">Position</label><select id="outingPosition" required></select></div></div>
  <div><label for="outingEmployee">Employee</label><select id="outingEmployee"><option value="">OPEN — needs coverage</option></select><p id="outingEligibleHint" class="small"></p></div>
- <div class="staff-fields"><div><label for="outingShiftStart">Start time</label><input id="outingShiftStart" type="time" value="06:00" required></div><div><label for="outingShiftEnd">End time</label><input id="outingShiftEnd" type="time" value="12:00" required></div></div>
+ <div id="outingCoverageField"><label for="outingCoverage">Where will this outing shift cover?</label><select id="outingCoverage"><option value="Both Courses">Both Courses — roaming/shared staff</option><option value="East">East Course</option><option value="West">West Course</option></select><p class="small">Pro Shop and Carts/Range automatically remain Shared. For two-course outings, choose Both Courses for the same Starter/Ranger covering both, or East/West for course-specific coverage.</p></div><div class="staff-fields"><div><label for="outingShiftStart">Start time</label><input id="outingShiftStart" type="time" value="06:00" required></div><div><label for="outingShiftEnd">End time</label><input id="outingShiftEnd" type="time" value="12:00" required></div></div>
  <button type="submit" class="primary" id="outingAddShiftBtn">Add outing shift</button><div id="outingShiftMsg" class="status"></div>
- </form></section></div>
+ </form>
+ <div class="outing-phase" id="outingExistingPanel"><h3>Use staff already scheduled that day</h3><p class="small">Choose an existing regular shift to include in this outing. Its employee, hours, and original location stay unchanged; no second shift is created.</p>
+ <div><label for="outingExistingShift">Existing shift</label><select id="outingExistingShift"><option value="">Save an outing first</option></select></div>
+ <div class="staff-fields"><div><label for="outingExistingPhase">Outing duty phase</label><select id="outingExistingPhase"><option value="setup">Setup</option><option value="operations" selected>During outing</option><option value="cleanup">Cleanup</option></select></div><div style="align-self:end"><button type="button" class="primary" id="outingLinkExisting">Use Existing Shift</button></div></div>
+ <div id="outingExistingMsg" class="status" role="status"></div></div>
+ </section></div>
 </section>
 <section id="staffView" class="hidden no-print" aria-label="Staff management">
  <div class="toolbar"><div><h2>Staff Management</h2><p>Manage the employee directory and qualified positions for both courses.</p></div><button class="primary" id="addStaffBtn" type="button">+ Add Employee</button></div>
@@ -209,7 +214,7 @@ function isSharedPosition(id){return ['pro','carts'].includes(departmentForPosit
 function updateCourseSelection(){
  const shared=isSharedPosition(el('position').value);
  const sharedCourse=courses.find(c=>c.name.toLowerCase()==='shared');
- const allowed=shared ? (sharedCourse?[sharedCourse]:[]) : courses.filter(c=>c.name.toLowerCase()!=='shared');
+ const allowed=shared ? (sharedCourse?[sharedCourse]:[]) : courses.filter(c=>['east','west'].includes(c.name.toLowerCase()));
  const existing=el('course').value;
  fillSelect('course',allowed);
  if(allowed.some(c=>c.id===existing)) el('course').value=existing;
@@ -242,7 +247,7 @@ function groupMarkup(items,group,conflicts){
  if(printOnly==='pro' || printOnly==='carts'){
   if(group!=='shared')return '';
  } else if(printOnly==='starter' && group==='shared')return '';
- const west=group==='West',shared=group==='shared',label=shared?'SHARED — PRO SHOP / CARTS & RANGE':`${group.toUpperCase()} COURSE`;
+ const west=group==='West',shared=group==='shared',label=shared?'SHARED — PRO SHOP / CARTS & RANGE':group==='Both Courses'?'BOTH COURSES — OUTING FIELD STAFF':`${group.toUpperCase()} COURSE`;
  return `<div class="course-section"><span class="course-label ${west?'west':shared?'shared':''}">${label}</span>${list.length?list.map(s=>shiftMarkup(s,conflicts,west?'west':shared?'shared':'')).join(''):'<span class="empty-course">No shifts</span>'}</div>`;
 }
 function render(){
@@ -257,7 +262,7 @@ function render(){
    const day=new Date(gridStart);day.setDate(gridStart.getDate()+i);
    const ds=dateStr(day),inMonth=day.getMonth()===month.getMonth();
    const items=shifts.filter(s=>s.shift_date===ds),conflicts=conflictsForDay(items);
-   html+=`<button class="day ${inMonth?'':'outside'} ${ds===selected?'selected':''} ${ds===dateStr(today)?'today':''}" data-day="${ds}"><span class="num">${day.getDate()}</span>${conflicts.size?`<span class="day-conflicts">⚠ Double-booking</span>`:''}${groupMarkup(items,'shared',conflicts)}${groupMarkup(items,'East',conflicts)}${groupMarkup(items,'West',conflicts)}</button>`;
+   html+=`<button class="day ${inMonth?'':'outside'} ${ds===selected?'selected':''} ${ds===dateStr(today)?'today':''}" data-day="${ds}"><span class="num">${day.getDate()}</span>${conflicts.size?`<span class="day-conflicts">⚠ Double-booking</span>`:''}${groupMarkup(items,'shared',conflicts)}${groupMarkup(items,'Both Courses',conflicts)}${groupMarkup(items,'East',conflicts)}${groupMarkup(items,'West',conflicts)}</button>`;
  }
  el('calendar').innerHTML=html;
  el('calendar').querySelectorAll('[data-day]').forEach(btn=>btn.onclick=()=>{selected=btn.dataset.day;if(!selected.startsWith(`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`))month=new Date(selected+'T12:00:00');render()});
@@ -575,31 +580,62 @@ el('myShiftsNext').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear
 
 // OUTING MODE: event metadata in outings; staffing in shifts with outing_id and outing_phase.
 function selectedOuting(){return outingRows.find(x=>x.id===activeOutingId)}
-function resetOutingEditor(){activeOutingId=null;el('outingForm').reset();el('outingDate').value=dateStr(today);el('outingEditorTitle').textContent='New outing';renderOutingList();renderOutingShifts();}
+function resetOutingEditor(){activeOutingId=null;el('outingForm').reset();el('outingDate').value=dateStr(today);el('outingEditorTitle').textContent='New outing';renderOutingList();renderOutingShifts();updateOutingCoverage();loadExistingOutingShifts();}
 function renderOutingList(){
  el('outingsList').innerHTML=outingRows.length?outingRows.map(o=>`<button type="button" class="outing-entry ${o.id===activeOutingId?'selected':''}" data-outing="${safe(o.id)}"><b>${safe(o.name)}</b><div class="outing-entry-meta">${safe(o.outing_date)} · ${safe(nameFor(courses,o.course_id))} · ${o.estimated_players||'—'} players</div></button>`).join(''):'<p class="small">No outings yet. Create one to schedule a special event.</p>';
  el('outingsList').querySelectorAll('[data-outing]').forEach(b=>b.onclick=()=>{activeOutingId=b.dataset.outing;populateOutingEditor();renderOutingList();renderOutingShifts()});
 }
 function populateOutingEditor(){
  const o=selectedOuting();if(!o)return;
- el('outingEditorTitle').textContent='Edit outing';el('outingName').value=o.name;el('outingDate').value=o.outing_date;el('outingCourse').value=o.course_id;el('outingStart').value=o.start_time?.slice(0,5)||'';el('outingPlayers').value=o.estimated_players||'';el('outingNotes').value=o.notes||'';
+ el('outingEditorTitle').textContent='Edit outing';el('outingName').value=o.name;el('outingDate').value=o.outing_date;el('outingCourse').value=o.course_id;el('outingStart').value=o.start_time?.slice(0,5)||'';el('outingPlayers').value=o.estimated_players||'';el('outingNotes').value=o.notes||'';updateOutingCoverage();
 }
 async function loadOutings(){
  if(!managerAllowed()||employeePreview)return;
  try{
   const [events,assigned]=await Promise.all([
    queryTable('outings','id,name,outing_date,course_id,start_time,estimated_players,notes',q=>q.order('outing_date',{ascending:false}).limit(150)),
-   queryTable('shifts','id,outing_id,outing_phase,shift_date,employee_id,position_id,course_id,start_time,end_time,status,notes',q=>q.not('outing_id','is',null).neq('status','cancelled'))
+   queryTable('shifts','id,outing_id,outing_phase,outing_created,shift_date,employee_id,position_id,course_id,start_time,end_time,status,notes',q=>q.not('outing_id','is',null).neq('status','cancelled'))
   ]);
   outingRows=events;outingShiftRows=assigned;
-  fillSelect('outingCourse',courses.filter(x=>['East','West'].includes(x.name)));
+  fillSelect('outingCourse',courses.filter(x=>['East','West','Both Courses'].includes(x.name)));
   fillSelect('outingPosition',positions);
   if(!activeOutingId&&!el('outingDate').value)el('outingDate').value=dateStr(today);
   if(activeOutingId&&!selectedOuting())activeOutingId=null;
-  renderOutingList();if(activeOutingId)populateOutingEditor();renderOutingShifts();updateOutingCandidates();
+  renderOutingList();if(activeOutingId)populateOutingEditor();renderOutingShifts();updateOutingCoverage();updateOutingCandidates();await loadExistingOutingShifts();
   message('outingListMsg','');
  }catch(e){message('outingListMsg',`Unable to load outings: ${e.message}`,true)}
 }
+function updateOutingCoverage(){
+ const o=selectedOuting();const courseName=o?nameFor(courses,o.course_id):el('outingCourse').selectedOptions[0]?.textContent;
+ const both=courseName==='Both Courses';
+ const field=el('outingCoverageField');field.classList.toggle('hidden',!both||isSharedPosition(el('outingPosition').value));
+ if(!both)el('outingCoverage').value='Both Courses';
+}
+async function loadExistingOutingShifts(){
+ const o=selectedOuting(),sel=el('outingExistingShift');
+ sel.innerHTML='<option value="">Choose an existing shift...</option>';
+ el('outingLinkExisting').disabled=!o;
+ if(!o)return;
+ const {data,error}=await supabase.from('shifts')
+   .select('id,employee_id,position_id,course_id,start_time,end_time,status,outing_id')
+   .eq('shift_date',o.outing_date).neq('status','cancelled').not('employee_id','is',null)
+   .order('start_time');
+ if(error){message('outingExistingMsg',error.message,true);return}
+ const other=(data||[]).filter(x=>!x.outing_id);
+ sel.innerHTML='<option value="">Choose an existing shift...</option>'+other.map(s=>
+  `<option value="${safe(s.id)}">${safe(nameFor(employees,s.employee_id,'full_name'))} · ${safe(nameFor(positions,s.position_id))} · ${safe(nameFor(courses,s.course_id))} · ${clock(s.start_time)}–${clock(s.end_time)} (${safe(s.status)})</option>`).join('');
+ message('outingExistingMsg',other.length?`${other.length} existing scheduled shifts can be linked without duplication.`:'All current assigned shifts are already linked to outings, or there are no shifts on this date.');
+}
+el('outingLinkExisting').addEventListener('click',async()=>{
+ const o=selectedOuting(),shiftId=el('outingExistingShift').value;
+ if(!o||!shiftId||!managerAllowed())return message('outingExistingMsg','Select an existing shift.',true);
+ const {data,error}=await supabase.from('shifts')
+  .update({outing_id:o.id,outing_phase:el('outingExistingPhase').value})
+  .eq('id',shiftId).eq('shift_date',o.outing_date).is('outing_id',null)
+  .select('id').maybeSingle();
+ if(error||!data)return message('outingExistingMsg',error?.message||'Shift was already linked or changed. Refresh and try again.',true);
+ await loadOutings();await reload();message('outingExistingMsg','Existing shift linked. Its scheduled hours and employee were not changed.');
+});
 function outingShiftConflict(employeeId,date,start,end){
  return outingShiftRows.some(s=>s.employee_id===employeeId&&s.shift_date===date&&s.status!=='cancelled'&&overlap(start,end,s.start_time,s.end_time));
 }
@@ -623,14 +659,15 @@ async function updateOutingCandidates(){
 }
 function renderOutingShifts(){
  const o=selectedOuting();el('outingStaffTitle').textContent=o?`Outing staffing — ${o.name}`:'Outing staff assignments';
- el('outingShiftForm').querySelectorAll('input,select,button').forEach(x=>x.disabled=!o);
+ el('outingShiftForm').querySelectorAll('input,select,button').forEach(x=>x.disabled=!o);el('outingLinkExisting').disabled=!o;
  if(!o){el('outingAssigned').innerHTML='<p class="small">Choose or save an outing to assign staff.</p>';return}
  const rows=outingShiftRows.filter(x=>x.outing_id===o.id);
  el('outingAssigned').innerHTML=['setup','operations','cleanup'].map(phase=>{
   const items=rows.filter(x=>(x.outing_phase||'operations')===phase);
-  return `<section class="outing-phase"><b>${phase==='setup'?'Setup':phase==='cleanup'?'Cleanup':'During outing'}</b>${items.length?items.map(s=>`<div class="outing-shift"><b>${safe(nameFor(positions,s.position_id))}</b> · ${safe(clock(s.start_time))}–${safe(clock(s.end_time))}<div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} · ${safe(nameFor(courses,s.course_id))} <span class="meta">(${safe(s.status)})</span></div>${s.status==='draft'?`<button type="button" data-outing-delete="${safe(s.id)}">Remove draft</button>`:''}</div>`).join(''):'<p class="small">No staff assigned</p>'}</section>`;
+  return `<section class="outing-phase"><b>${phase==='setup'?'Setup':phase==='cleanup'?'Cleanup':'During outing'}</b>${items.length?items.map(s=>`<div class="outing-shift"><b>${safe(nameFor(positions,s.position_id))}</b> · ${safe(clock(s.start_time))}–${safe(clock(s.end_time))}<div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} · ${safe(nameFor(courses,s.course_id))} <span class="meta">(${safe(s.status)})</span></div>${s.outing_created&&s.status==='draft'?`<button type="button" data-outing-delete="${safe(s.id)}">Delete outing draft</button>`:`<button type="button" data-outing-unlink="${safe(s.id)}">Remove from outing (keep shift)</button>`}</div>`).join(''):'<p class="small">No staff assigned</p>'}</section>`;
  }).join('');
  el('outingAssigned').querySelectorAll('[data-outing-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this outing draft shift?'))return;const {error}=await supabase.from('shifts').delete().eq('id',b.dataset.outingDelete).eq('status','draft');if(error)message('outingShiftMsg',error.message,true);else{await loadOutings();await reload()}});
+ el('outingAssigned').querySelectorAll('[data-outing-unlink]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this shift from the outing? The regular scheduled shift will remain.'))return;const {error}=await supabase.from('shifts').update({outing_id:null,outing_phase:null}).eq('id',b.dataset.outingUnlink).eq('outing_id',o.id);if(error)message('outingShiftMsg',error.message,true);else{await loadOutings();await reload();message('outingShiftMsg','Shift removed from outing. Original assignment kept.')}});
 }
 el('newOutingBtn').onclick=()=>{resetOutingEditor();updateOutingCandidates()};
 el('outingForm').addEventListener('submit',async e=>{
@@ -642,19 +679,24 @@ el('outingForm').addEventListener('submit',async e=>{
  const q=activeOutingId?supabase.from('outings').update(payload).eq('id',activeOutingId):supabase.from('outings').insert(payload);
  const {data,error}=await q.select('id').single();
  if(error)return message('outingSaveMsg',error.message,true);
- activeOutingId=data.id;await loadOutings();message('outingSaveMsg','Outing saved. Add setup, operations, and cleanup shifts below.');
+ activeOutingId=data.id;await loadOutings();message('outingSaveMsg','Outing saved. Link people already scheduled, or add setup, operations, and cleanup shifts below.');
 });
 for(const field of ['outingPosition','outingShiftStart','outingShiftEnd'])el(field).addEventListener('change',updateOutingCandidates);
+el('outingPosition').addEventListener('change',updateOutingCoverage);
+el('outingCourse').addEventListener('change',updateOutingCoverage);
 el('outingShiftForm').addEventListener('submit',async e=>{
  e.preventDefault();const o=selectedOuting();if(!o||!managerAllowed())return;
  const positionId=el('outingPosition').value,employeeId=el('outingEmployee').value||null,start=el('outingShiftStart').value,end=el('outingShiftEnd').value;
  if(!positionId||start>=end)return message('outingShiftMsg','Check the position and shift hours.',true);
  // Shared course for Pro Shop/Carts, East/West for starters/rangers.
- const shared=courses.find(c=>c.name==='Shared');const courseId=isSharedPosition(positionId)?shared?.id:o.course_id;
+ const shared=courses.find(c=>c.name==='Shared');const both=nameFor(courses,o.course_id)==='Both Courses';
+ const coverage=both?el('outingCoverage').value:null;
+ const destination=both?courses.find(c=>c.name===coverage):null;
+ const courseId=isSharedPosition(positionId)?shared?.id:both?destination?.id:o.course_id;
  if(!courseId)return message('outingShiftMsg','Shared course is missing. Run the shared-course setup first.',true);
  await updateOutingCandidates();
  if(employeeId&&!Array.from(el('outingEmployee').options).some(op=>op.value===employeeId))return message('outingShiftMsg','Employee is no longer eligible for this assignment. Choose another.',true);
- const {error}=await supabase.from('shifts').insert({outing_id:o.id,outing_phase:el('outingPhase').value,shift_date:o.outing_date,course_id:courseId,position_id:positionId,employee_id:employeeId,start_time:start,end_time:end,status:'draft',notes:`Outing: ${o.name} (${el('outingPhase').value})`,created_by:profile.user.id});
+ const {error}=await supabase.from('shifts').insert({outing_id:o.id,outing_phase:el('outingPhase').value,outing_created:true,shift_date:o.outing_date,course_id:courseId,position_id:positionId,employee_id:employeeId,start_time:start,end_time:end,status:'draft',notes:`Outing: ${o.name} (${el('outingPhase').value})`,created_by:profile.user.id});
  if(error)return message('outingShiftMsg',error.message,true);
  await loadOutings();await reload();message('outingShiftMsg','Outing draft shift added to the main calendar.');
 });
