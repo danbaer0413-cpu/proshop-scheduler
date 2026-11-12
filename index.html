@@ -69,7 +69,7 @@
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
 <nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="outingTab" class="navbtn hidden" type="button">Outing Mode</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
 <div id="calendarView">
-<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="publishReviewBtn" class="primary" type="button">Review &amp; Publish</button><button id="copyDayBtn" type="button">Copy Day / Department</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
+<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option><option value="east_field">East Starters &amp; Rangers</option><option value="west_field">West Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="publishReviewBtn" class="primary" type="button">Review &amp; Publish</button><button id="copyDayBtn" type="button">Copy Day / Department</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
 <section id="publishPanel" class="card no-print hidden" style="margin:0 0 14px" aria-label="Review and publish monthly shifts">
   <div class="topline"><div><h2>Review &amp; Publish Schedule</h2><p class="small" id="publishMonthLabel"></p></div><button type="button" id="closePublishPanel">Close</button></div>
   <p class="small">Only assigned <b>draft</b> shifts are published. OPEN shifts remain drafts. Staff can see published shifts in My Shifts; publishing does not send emails.</p>
@@ -209,7 +209,17 @@ function departmentForPosition(id){
  if(n==='starter'||n==='ranger')return 'starter';
  return 'other';
 }
-function visibleShift(s){return !printOnly||printOnly==='all'||departmentForPosition(s.position_id)===printOnly}
+function visibleShift(s){
+ if(!printOnly||printOnly==='all')return true;
+ const department=departmentForPosition(s.position_id);
+ if(printOnly==='east_field'||printOnly==='west_field'){
+  const courseName=nameFor(courses,s.course_id);
+  const target=printOnly==='east_field'?'East':'West';
+  // A single Both Courses Ranger covers both courses; show it on both printed reports.
+  return department==='starter'&&(courseName===target||courseName==='Both Courses');
+ }
+ return department===printOnly;
+}
 function isSharedPosition(id){return ['pro','carts'].includes(departmentForPosition(id))}
 function updateCourseSelection(){
  const shared=isSharedPosition(el('position').value);
@@ -251,7 +261,9 @@ function groupMarkup(items,group,conflicts){
  )).sort((a,b)=>a.start_time.localeCompare(b.start_time));
  if(printOnly==='pro' || printOnly==='carts'){
   if(group!=='shared')return '';
- } else if(printOnly==='starter' && group==='shared')return '';
+ } else if(['starter','east_field','west_field'].includes(printOnly) && group==='shared')return '';
+ if(printOnly==='east_field' && group==='West')return '';
+ if(printOnly==='west_field' && group==='East')return '';
  const west=group==='West',shared=group==='shared',label=shared?'SHARED — PRO SHOP / CARTS & RANGE':group==='Both Courses'?'BOTH COURSES — ROVING FIELD STAFF':`${group.toUpperCase()} COURSE`;
  return `<div class="course-section"><span class="course-label ${west?'west':shared?'shared':''}">${label}</span>${list.length?list.map(s=>shiftMarkup(s,conflicts,west?'west':shared?'shared':'')).join(''):'<span class="empty-course">No shifts</span>'}</div>`;
 }
@@ -259,7 +271,7 @@ function render(){
  const start=new Date(month.getFullYear(),month.getMonth(),1),gridStart=new Date(start);
  gridStart.setDate(start.getDate()-start.getDay());
  el('monthTitle').textContent=month.toLocaleDateString('en-US',{month:'long',year:'numeric'});
- el('print-heading').textContent=`Mercer Oaks – Shared staff + East/West field teams | ${el('monthTitle').textContent} | ${printOnly==='pro'?'Pro Shop':printOnly==='carts'?'Carts & Range':printOnly==='starter'?'Starters & Rangers':'All Departments'}`;
+ el('print-heading').textContent=`Mercer Oaks – Shared staff + East/West field teams | ${el('monthTitle').textContent} | ${printOnly==='pro'?'Pro Shop':printOnly==='carts'?'Carts & Range':printOnly==='starter'?'Starters & Rangers':printOnly==='east_field'?'East Starters & Rangers (incl. Both-Course Rangers)':printOnly==='west_field'?'West Starters & Rangers (incl. Both-Course Rangers)':'All Departments'}`;
  let html=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="day-head">${d}</div>`).join('');
  const lastDay=new Date(month.getFullYear(),month.getMonth()+1,0);
  const cells=Math.ceil((start.getDay()+lastDay.getDate())/7)*7;
