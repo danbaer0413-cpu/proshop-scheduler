@@ -30,13 +30,62 @@
 .my-shifts-empty{color:var(--muted);padding:16px;background:#152630;border:1px solid var(--line);border-radius:9px}
 @media(max-width:1000px){.my-shifts-layout{grid-template-columns:1fr}}
 @media(max-width:550px){.my-shifts-calendar{gap:3px}.my-cal-day{min-height:69px;padding:4px}.my-cal-item{font-size:9px;padding:2px}.my-cal-head{font-size:10px}.my-schedule-subtitle{font-size:14px}}
+
+/* Manager publishing review */
+.publish-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}
+.publish-metric{background:#152c32;border:1px solid var(--line);padding:12px;border-radius:10px}
+.publish-metric strong{display:block;font-size:23px;margin-top:5px}
+.publish-issues{max-height:265px;overflow:auto;margin:10px 0}
+.publish-issue{border-left:3px solid #e2b85d;padding:7px 9px;background:#322b22;margin:5px 0;border-radius:4px}
+.publish-issue.block{border-color:#ed7f7f;background:#40282b}
+.publish-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.publish-actions .check{font-weight:500;color:var(--text)}
+@media(max-width:700px){.publish-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{#publishPanel{display:none!important}}
+
+/* Full published monthly schedule for employees */
+.employee-full-month{margin-top:16px;margin-bottom:18px}
+.employee-full-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.employee-full-day{border:1px solid var(--line);border-radius:8px;background:#10232b;padding:6px;min-height:104px;overflow-wrap:anywhere}
+.employee-full-day.other-month{opacity:.27}
+.employee-full-day .date-num{font-weight:800;font-size:12px}
+.employee-full-line{font-size:10px;line-height:1.3;background:#1c343a;border-left:2px solid #6ecbb3;border-radius:3px;padding:3px 4px;margin-top:4px}
+.employee-full-line.west{border-color:#e2b85d}
+.employee-full-line.my-own{background:#1d4b3e;font-weight:800}
+.full-month-legend{font-size:11px;color:var(--muted);margin:7px 0}
+.outing-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(340px,1.15fr);gap:14px}
+.outing-list{display:grid;gap:8px;max-height:370px;overflow:auto}
+.outing-entry{padding:10px;border:1px solid var(--line);border-radius:9px;text-align:left;width:100%}
+.outing-entry.selected{border-color:var(--green);background:#183b34}
+.outing-phase{border-top:1px solid var(--line);padding-top:8px;margin-top:12px}
+.outing-entry-meta{font-size:11px;color:var(--muted)}
+.outing-shift{background:#183039;border-left:3px solid #51c4a0;padding:9px;border-radius:6px;margin:5px 0}
+@media(max-width:900px){.outing-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.employee-full-day{min-height:85px;padding:3px}.employee-full-grid{gap:3px}.employee-full-line{font-size:8px;padding:2px}}
+@media print{#outingsView{display:none!important}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
 <section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Set a password to sign in again later. Your invitation has already verified your email address.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
 <section id="app"><div class="header no-print"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks</h1><p>Staff Scheduler · East + West</p></div></div><div class="controls"><span id="accountName" class="pill"></span><button id="refreshBtn">Refresh</button><button id="signoutBtn">Sign out</button></div></div>
-<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
+<nav class="navbar no-print" aria-label="Main navigation"><button id="calendarTab" class="navbtn active" type="button">Monthly Schedule</button><button id="outingTab" class="navbtn hidden" type="button">Outing Mode</button><button id="staffTab" class="navbtn hidden" type="button">Staff Management</button><button id="availabilityTab" class="navbtn" type="button">My Availability</button><button id="myShiftsTab" class="navbtn" type="button">My Shifts</button><button id="employeePreviewBtn" class="navbtn hidden" type="button">Switch to Employee View</button></nav>
 <div id="calendarView">
-<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="copyDayBtn" type="button">Copy Day / Department</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
+<div class="toolbar no-print"><div class="controls"><button id="prevMonth" aria-label="Previous month">◀</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="Next month">▶</button><button id="todayBtn">Today</button></div><div class="controls"><label for="printDepartment" class="print-label" style="margin:0">Print: <select id="printDepartment" aria-label="Department to print"><option value="all">All departments</option><option value="pro">Pro Shop</option><option value="carts">Carts &amp; Range</option><option value="starter">Starters &amp; Rangers</option></select></label><button id="printBtn">Print selected calendar</button><button id="publishReviewBtn" class="primary" type="button">Review &amp; Publish</button><button id="copyDayBtn" type="button">Copy Day / Department</button><button id="copyBtn">Copy previous month’s pattern</button></div></div>
+<section id="publishPanel" class="card no-print hidden" style="margin:0 0 14px" aria-label="Review and publish monthly shifts">
+  <div class="topline"><div><h2>Review &amp; Publish Schedule</h2><p class="small" id="publishMonthLabel"></p></div><button type="button" id="closePublishPanel">Close</button></div>
+  <p class="small">Only assigned <b>draft</b> shifts are published. OPEN shifts remain drafts. Staff can see published shifts in My Shifts; publishing does not send emails.</p>
+  <div style="max-width:350px;margin-top:12px"><label for="publishScope">Publish which department?</label><select id="publishScope">
+    <option value="all">Entire month — all departments</option>
+    <option value="pro">Pro Shop — shared</option>
+    <option value="carts">Carts &amp; Range — shared</option>
+    <option value="field">Starters &amp; Rangers — East + West</option>
+    <option value="starter">Starters only — East + West</option>
+    <option value="ranger">Rangers only — East + West</option>
+  </select></div>
+  <div class="publish-grid" id="publishStats"></div>
+  <div id="publishIssues" class="publish-issues" aria-live="polite"></div>
+  <div class="publish-actions"><label class="check"><input type="checkbox" id="publishOpenAck"> I understand OPEN shifts will remain drafts</label><button class="primary" type="button" id="confirmPublishBtn">Publish assigned drafts</button><button type="button" id="refreshPublishBtn">Refresh review</button></div>
+  <div id="publishMessage" class="status" role="status"></div>
+</section>
 <section id="copyDayPanel" class="card no-print hidden" style="margin:0 0 14px" aria-label="Copy scheduled shifts from one date to another">
  <div class="topline"><h2>Copy a day or just one team</h2><button type="button" id="closeCopyDay">Close</button></div>
  <p class="small">The day selected on the calendar is the source. Copy the entire day, or only one position group. East and West starter/ranger shifts are included together.</p>
@@ -48,6 +97,25 @@
  </form>
 </section>
 <h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters and Rangers are listed separately for East and West. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
+<section id="outingsView" class="hidden no-print" aria-label="Outing planning and staffing">
+ <div class="toolbar"><div><h2>Outing Mode</h2><p>Plan a special-event day and assign setup, operations, and cleanup staff. Outing shifts automatically appear on the main schedule as drafts.</p></div><button class="primary" id="newOutingBtn" type="button">+ New Outing</button></div>
+ <div class="outing-layout">
+ <section class="card"><h3>Outings</h3><div id="outingsList" class="outing-list"></div><div id="outingListMsg" class="status small"></div>
+ <h3 style="margin-top:20px" id="outingEditorTitle">New outing</h3>
+ <form id="outingForm" class="stack"><div><label for="outingName">Outing name</label><input id="outingName" required maxlength="140" placeholder="e.g. Corporate Golf Outing"></div>
+ <div class="staff-fields"><div><label for="outingDate">Date</label><input id="outingDate" type="date" required></div><div><label for="outingCourse">Course</label><select id="outingCourse" required></select></div></div>
+ <div class="staff-fields"><div><label for="outingStart">Shotgun / starting time (optional)</label><input id="outingStart" type="time"></div><div><label for="outingPlayers">Players (optional)</label><input id="outingPlayers" type="number" min="1" max="500"></div></div>
+ <div><label for="outingNotes">Event notes (optional)</label><textarea id="outingNotes" rows="3" maxlength="1000" style="width:100%;background:#0e1b23;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px" placeholder="Cart staging, check-in, special needs..."></textarea></div>
+ <button type="submit" class="primary">Save outing</button><div id="outingSaveMsg" class="status"></div></form></section>
+ <section class="card"><h3 id="outingStaffTitle">Outing staff assignments</h3><p class="small">Save or select an outing first. Assignments are real Mercer Oaks shifts and remain drafts until Review &amp; Publish.</p>
+ <div id="outingAssigned"></div>
+ <form id="outingShiftForm" class="stack" style="margin-top:15px">
+ <div class="staff-fields"><div><label for="outingPhase">Event phase</label><select id="outingPhase"><option value="setup">Setup</option><option value="operations">During outing</option><option value="cleanup">Cleanup</option></select></div><div><label for="outingPosition">Position</label><select id="outingPosition" required></select></div></div>
+ <div><label for="outingEmployee">Employee</label><select id="outingEmployee"><option value="">OPEN — needs coverage</option></select><p id="outingEligibleHint" class="small"></p></div>
+ <div class="staff-fields"><div><label for="outingShiftStart">Start time</label><input id="outingShiftStart" type="time" value="06:00" required></div><div><label for="outingShiftEnd">End time</label><input id="outingShiftEnd" type="time" value="12:00" required></div></div>
+ <button type="submit" class="primary" id="outingAddShiftBtn">Add outing shift</button><div id="outingShiftMsg" class="status"></div>
+ </form></section></div>
+</section>
 <section id="staffView" class="hidden no-print" aria-label="Staff management">
  <div class="toolbar"><div><h2>Staff Management</h2><p>Manage the employee directory and qualified positions for both courses.</p></div><button class="primary" id="addStaffBtn" type="button">+ Add Employee</button></div>
  <div class="staff-layout">
@@ -67,7 +135,8 @@
 </section>
 <section id="myShiftsView" class="hidden no-print" aria-label="My scheduled shifts">
  <div class="toolbar"><div><h2>My Shifts</h2><p>Your upcoming assignments for Mercer Oaks, across shared operations and both courses.</p></div><div class="controls"><button type="button" id="myShiftsPrev">◀</button><strong id="myShiftsMonthLabel"></strong><button type="button" id="myShiftsNext">▶</button></div></div>
- <div class="card"><div id="myShiftsIdentity" class="status" role="status"></div><div class="my-shifts-layout"><div><h3 class="my-schedule-subtitle">My Monthly Calendar</h3><div id="myShiftsCalendar" class="my-shifts-calendar" aria-label="My monthly shift calendar"></div></div><div><h3 class="my-schedule-subtitle">My Scheduled Shifts</h3><div id="myShiftsList"></div></div></div><p class="small" style="margin-top:14px">Employees see only published or completed shifts. Draft assignments are visible to managers until they are published.</p></div>
+ <section class="card employee-full-month"><div class="topline"><div><h3 class="my-schedule-subtitle">Full Published Monthly Schedule</h3><p class="small">Read-only: see everyone scheduled in Pro Shop, Carts/Range, and East/West Starters and Rangers. Your shifts are highlighted.</p></div></div><div id="fullMonthlyStatus" class="small status" role="status"></div><div id="fullMonthlyCalendar" class="employee-full-grid" aria-label="Full published staff schedule"></div><p class="full-month-legend">Employees see published/completed shifts only; no draft or open assignments appear.</p></section>
+<div class="card"><div id="myShiftsIdentity" class="status" role="status"></div><div class="my-shifts-layout"><div><h3 class="my-schedule-subtitle">My Monthly Calendar</h3><div id="myShiftsCalendar" class="my-shifts-calendar" aria-label="My monthly shift calendar"></div></div><div><h3 class="my-schedule-subtitle">My Scheduled Shifts</h3><div id="myShiftsList"></div></div></div><p class="small" style="margin-top:14px">Employees see only published or completed shifts. Draft assignments are visible to managers until they are published.</p></div>
 </section>
 <section id="availabilityView" class="hidden no-print" aria-label="My availability">
  <div class="toolbar"><div><h2>My Availability</h2><p>Tap every day you cannot work, then submit those dates. Managers see the requests when scheduling.</p></div><div class="controls"><button id="availPrev" type="button">◀</button><strong id="availMonth"></strong><button id="availNext" type="button">▶</button></div></div>
@@ -80,11 +149,11 @@
 <script type="module">
 import { supabase } from './supabase.js';
 const el=id=>document.getElementById(id), dateStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[],employeePreview=false,myShiftsMonth=new Date(today.getFullYear(),today.getMonth(),1);
+const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[],employeePreview=false,myShiftsMonth=new Date(today.getFullYear(),today.getMonth(),1),activeOutingId=null,outingRows=[],outingShiftRows=[];
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
-async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyDayBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
+async function enterApp(){el('loginCard').classList.add('hidden');el('app').style.display='block';el('roleBadge').textContent=profile.role;el('managerPanel').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('copyDayBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('publishReviewBtn').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('accountName').textContent=profile.role.toUpperCase();el('staffTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));el('outingTab').classList.toggle('hidden',!['admin','manager'].includes(profile.role));await resolveSelf();await reload();el('employeePreviewBtn').classList.toggle('hidden',!managerAllowed());if(profile.role==='employee')staffView('myshifts')}
 async function initialize(){const {data:{user},error}=await supabase.auth.getUser();if(error||!user)return;try{const list=await queryTable('profiles','role,user_id',q=>q.eq('user_id',user.id));if(!list.length){message('loginMessage','Account exists, but it has not yet been granted scheduler access.',true);return}profile={...list[0],user};if(profile.role==='employee' && user.user_metadata?.mo_password_setup_complete !== true){el('loginCard').classList.add('hidden');el('app').style.display='none';el('inviteActivation').classList.remove('hidden');return;}el('inviteActivation').classList.add('hidden');await enterApp()}catch(e){message('loginMessage',e.message,true)}}
 el('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();message('loginMessage','Signing in...');try{const {error}=await supabase.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});if(error)return message('loginMessage',error.message,true);await initialize()}catch(err){message('loginMessage',`Login error: ${err.message}`,true)}});
 el('activationForm').addEventListener('submit',async ev=>{
@@ -108,7 +177,7 @@ el('activationForm').addEventListener('submit',async ev=>{
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
-async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status,notes',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
+async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status,notes,outing_id,outing_phase',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
 function unavailableFor(employeeId,day,start,end){
  return availability.some(a=>a.employee_id===employeeId && a.unavailable_date===day &&
   (a.all_day || overlap(start,end,a.start_time,a.end_time)));
@@ -163,7 +232,7 @@ function conflictsForDay(items){
 }
 function shiftMarkup(s,conflicts,cssClass=''){
  const unavailable=s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time);
- return `<span class="mini ${cssClass} ${conflicts.has(s.id)?'conflict':''} ${unavailable?'unavailable':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''} ${unavailable?'⚠ OFF':''}${s.notes?.startsWith('Needs coverage:')?' ⚠ COVERAGE':''}</span>`;
+ return `<span class="mini ${cssClass} ${conflicts.has(s.id)?'conflict':''} ${unavailable?'unavailable':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''} ${unavailable?'⚠ OFF':''}${s.outing_id?' ⛳ OUTING':''}${s.notes?.startsWith('Needs coverage:')?' ⚠ COVERAGE':''}</span>`;
 }
 function groupMarkup(items,group,conflicts){
  const list=items.filter(s=>visibleShift(s)&&(
@@ -202,7 +271,7 @@ function renderDay(){
  el('dayShifts').innerHTML=['shared','East','West'].map(group=>{
   const items=dayItems.filter(s=>group==='shared'?isSharedPosition(s.position_id):!isSharedPosition(s.position_id)&&nameFor(courses,s.course_id)===group);
   const title=group==='shared'?'SHARED — PRO SHOP / CARTS & RANGE':`${group.toUpperCase()} COURSE`;
-  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>':''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
+  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>':''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
  }).join('');
  el('dayShifts').querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this shift?'))return;const {error}=await supabase.from('shifts').delete().eq('id',b.dataset.remove);if(error)alert(error.message);else await reload()});
 }
@@ -221,6 +290,78 @@ function copyScopeMatches(shift,scope){
  if(scope==='field')return title==='starter'||title==='ranger';
  return title===scope;
 }
+// PUBLISHING — review client-side, publish atomically in Supabase using an authenticated RPC.
+const publishLabel={all:'All departments',pro:'Pro Shop',carts:'Carts & Range',field:'Starters & Rangers',starter:'Starters',ranger:'Rangers'};
+function scopeIncludes(positionId,scope){
+ const n=positions.find(p=>p.id===positionId)?.name;
+ if(scope==='all')return true;
+ if(scope==='pro')return n==='Pro Shop';
+ if(scope==='carts')return n==='Cart Attendant'||n==='Range';
+ if(scope==='field')return n==='Starter'||n==='Ranger';
+ if(scope==='starter')return n==='Starter';
+ if(scope==='ranger')return n==='Ranger';
+ return false;
+}
+function publishReview(){
+ const scope=el('publishScope').value;
+ const selectedShifts=shifts.filter(s=>scopeIncludes(s.position_id,scope));
+ const drafts=selectedShifts.filter(s=>s.status==='draft');
+ const assigned=drafts.filter(s=>s.employee_id);
+ const open=drafts.filter(s=>!s.employee_id);
+ const already=selectedShifts.filter(s=>s.status==='published').length;
+ const problems=[];
+ for(const s of assigned){
+  const staff=employees.find(e=>e.id===s.employee_id);
+  const description=`${s.shift_date} · ${nameFor(positions,s.position_id)} · ${staff?.full_name||'Unknown employee'}`;
+  if(!staff)problems.push(`${description}: employee inactive or missing`);
+  if(!qualifications.some(q=>q.employee_id===s.employee_id && q.position_id===s.position_id))problems.push(`${description}: not qualified`);
+  if(unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time))problems.push(`${description}: unavailable during shift`);
+  if(selectedShifts.concat(shifts.filter(s2=>!selectedShifts.includes(s2))).some(other=>other.id!==s.id && other.employee_id===s.employee_id && other.shift_date===s.shift_date && other.status!=='cancelled' && overlap(s.start_time,s.end_time,other.start_time,other.end_time)))problems.push(`${description}: overlapping assignment`);
+ }
+ el('publishMonthLabel').textContent=month.toLocaleDateString('en-US',{month:'long',year:'numeric'})+' — '+publishLabel[scope];
+ const metrics=[['Assigned drafts',assigned.length],['Open drafts',open.length],['Already published',already],['Blocking issues',problems.length]];
+ el('publishStats').innerHTML=metrics.map(([label,num])=>`<div class="publish-metric"><span class="small">${label}</span><strong>${num}</strong></div>`).join('');
+ const items=[...problems.map(t=>({t,b:true})),...open.map(s=>({t:`${s.shift_date} · ${nameFor(positions,s.position_id)} · ${nameFor(courses,s.course_id)} · ${clock(s.start_time)}–${clock(s.end_time)} — OPEN${s.notes?' · '+s.notes:''}`,b:false}))];
+ el('publishIssues').innerHTML=items.length?items.map(x=>`<div class="publish-issue ${x.b?'block':''}">${x.b?'BLOCKED: ':'OPEN: '}${safe(x.t)}</div>`).join(''):'<p class="good">No open slots or detected conflicts in this selection.</p>';
+ el('publishOpenAck').closest('label').classList.toggle('hidden',open.length===0);
+ if(open.length===0)el('publishOpenAck').checked=false;
+ el('confirmPublishBtn').disabled=assigned.length===0||problems.length>0||(open.length>0&&!el('publishOpenAck').checked);
+ return{assigned:assigned.length,open:open.length,problems:problems.length,scope};
+}
+el('publishReviewBtn').addEventListener('click',async()=>{
+ if(!managerAllowed()||employeePreview)return;
+ el('publishPanel').classList.remove('hidden');
+ el('publishOpenAck').checked=false;
+ message('publishMessage','Refreshing the schedule before review...');
+ await reload();
+ publishReview();
+ message('publishMessage','Review the counts and any warnings before publishing.');
+});
+el('closePublishPanel').onclick=()=>el('publishPanel').classList.add('hidden');
+el('publishScope').onchange=()=>{el('publishOpenAck').checked=false;publishReview()};
+el('publishOpenAck').onchange=publishReview;
+el('refreshPublishBtn').onclick=async()=>{await reload();publishReview();message('publishMessage','Review refreshed.')};
+el('confirmPublishBtn').addEventListener('click',async()=>{
+ if(!managerAllowed()||employeePreview)return;
+ // Re-read current data before finalizing. Database re-checks inside the RPC as well.
+ await reload();
+ const review=publishReview();
+ if(review.problems||!review.assigned||(review.open>0&&!el('publishOpenAck').checked))return message('publishMessage','Cannot publish: address the warnings and confirm open shifts.',true);
+ const scopeLabel=publishLabel[review.scope];
+ const period=month.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+ if(!confirm(`Publish ${review.assigned} assigned draft shift(s) for ${scopeLabel} in ${period}? ${review.open} OPEN shift(s) will remain drafts. Employees will be able to see published shifts.`))return;
+ const btn=el('confirmPublishBtn');btn.disabled=true;
+ message('publishMessage','Publishing in Supabase...');
+ try{
+  const {data,error}=await supabase.rpc('publish_mercer_schedule',{p_month:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),p_scope:review.scope});
+  if(error)throw error;
+  await reload();publishReview();
+  const count=data?.published_count??0;
+  message('publishMessage',`${count} shift(s) published successfully. ${data?.open_count??0} OPEN shift(s) remain drafts. No emails were sent.`);
+ }catch(error){message('publishMessage',`Publish failed: ${error.message}. No shifts should have been partially published by this operation.`,true)}
+ finally{publishReview()}
+});
+
 el('copyDayBtn').onclick=()=>{
  if(!managerAllowed())return;
  el('copyDayPanel').classList.remove('hidden');
@@ -365,10 +506,45 @@ function renderMyShiftCalendar(rows){
  }
  el('myShiftsCalendar').innerHTML=markup;
 }
+// Employee-facing read-only whole-month view; drafts are excluded even for managers previewing.
+async function loadFullPublishedMonth(){
+ const from=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1));
+ const to=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1));
+ el('fullMonthlyStatus').textContent='Loading published monthly schedule...';
+ try{
+  const {data,error}=await supabase.from('shifts').select('id,shift_date,employee_id,position_id,course_id,start_time,end_time,status')
+   .gte('shift_date',from).lt('shift_date',to).in('status',['published','completed'])
+   .not('employee_id','is',null).order('start_time');
+  if(error)throw error;
+  const rows=data||[];
+  const first=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1),start=new Date(first);
+  start.setDate(1-first.getDay());
+  const last=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,0);
+  const cells=Math.ceil((first.getDay()+last.getDate())/7)*7;
+  let markup=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class="my-cal-head">${x}</div>`).join('');
+  for(let i=0;i<cells;i++){
+   const day=new Date(start);day.setDate(start.getDate()+i);
+   const key=dateStr(day),within=day.getMonth()===myShiftsMonth.getMonth();
+   const items=within?rows.filter(r=>r.shift_date===key):[];
+   markup+=`<div class="employee-full-day ${within?'':'other-month'}"><div class="date-num">${day.getDate()}</div>`;
+   for(const s of items){
+    const position=nameFor(positions,s.position_id),course=nameFor(courses,s.course_id);
+    const location=isSharedPosition(s.position_id)?'Shared':course;
+    const staff=nameFor(employees,s.employee_id,'full_name');
+    const own=employeeSelf?.id===s.employee_id;
+    markup+=`<div class="employee-full-line ${location==='West'?'west':''} ${own?'my-own':''}">${safe(clock(s.start_time))}–${safe(clock(s.end_time))} ${safe(staff)}<div>${safe(position)}${location==='Shared'?'':' · '+safe(location)}</div></div>`;
+   }
+   markup+='</div>';
+  }
+  el('fullMonthlyCalendar').innerHTML=markup;
+  el('fullMonthlyStatus').textContent=rows.length?`${rows.length} published shift(s) shown. Your shifts are highlighted.`:'No published shifts for this month.';
+ }catch(e){el('fullMonthlyCalendar').innerHTML='';el('fullMonthlyStatus').textContent=`Could not load published schedule: ${e.message}`;}
+}
+
 async function loadMyShifts(){
  const from=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth(),1));
  const to=dateStr(new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1));
- el('myShiftsMonthLabel').textContent=myShiftsMonth.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+ el('myShiftsMonthLabel').textContent=myShiftsMonth.toLocaleDateString('en-US',{month:'short',year:'numeric'});await loadFullPublishedMonth();
  if(!employeeSelf){
    el('myShiftsIdentity').textContent='Your login is not linked to an employee. Ask a manager to connect your account.';
    el('myShiftsList').innerHTML='';renderMyShiftCalendar([]);
@@ -397,6 +573,92 @@ async function loadMyShifts(){
 el('myShiftsPrev').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()-1,1);loadMyShifts()};
 el('myShiftsNext').onclick=()=>{myShiftsMonth=new Date(myShiftsMonth.getFullYear(),myShiftsMonth.getMonth()+1,1);loadMyShifts()};
 
+// OUTING MODE: event metadata in outings; staffing in shifts with outing_id and outing_phase.
+function selectedOuting(){return outingRows.find(x=>x.id===activeOutingId)}
+function resetOutingEditor(){activeOutingId=null;el('outingForm').reset();el('outingDate').value=dateStr(today);el('outingEditorTitle').textContent='New outing';renderOutingList();renderOutingShifts();}
+function renderOutingList(){
+ el('outingsList').innerHTML=outingRows.length?outingRows.map(o=>`<button type="button" class="outing-entry ${o.id===activeOutingId?'selected':''}" data-outing="${safe(o.id)}"><b>${safe(o.name)}</b><div class="outing-entry-meta">${safe(o.outing_date)} · ${safe(nameFor(courses,o.course_id))} · ${o.estimated_players||'—'} players</div></button>`).join(''):'<p class="small">No outings yet. Create one to schedule a special event.</p>';
+ el('outingsList').querySelectorAll('[data-outing]').forEach(b=>b.onclick=()=>{activeOutingId=b.dataset.outing;populateOutingEditor();renderOutingList();renderOutingShifts()});
+}
+function populateOutingEditor(){
+ const o=selectedOuting();if(!o)return;
+ el('outingEditorTitle').textContent='Edit outing';el('outingName').value=o.name;el('outingDate').value=o.outing_date;el('outingCourse').value=o.course_id;el('outingStart').value=o.start_time?.slice(0,5)||'';el('outingPlayers').value=o.estimated_players||'';el('outingNotes').value=o.notes||'';
+}
+async function loadOutings(){
+ if(!managerAllowed()||employeePreview)return;
+ try{
+  const [events,assigned]=await Promise.all([
+   queryTable('outings','id,name,outing_date,course_id,start_time,estimated_players,notes',q=>q.order('outing_date',{ascending:false}).limit(150)),
+   queryTable('shifts','id,outing_id,outing_phase,shift_date,employee_id,position_id,course_id,start_time,end_time,status,notes',q=>q.not('outing_id','is',null).neq('status','cancelled'))
+  ]);
+  outingRows=events;outingShiftRows=assigned;
+  fillSelect('outingCourse',courses.filter(x=>['East','West'].includes(x.name)));
+  fillSelect('outingPosition',positions);
+  if(!activeOutingId&&!el('outingDate').value)el('outingDate').value=dateStr(today);
+  if(activeOutingId&&!selectedOuting())activeOutingId=null;
+  renderOutingList();if(activeOutingId)populateOutingEditor();renderOutingShifts();updateOutingCandidates();
+  message('outingListMsg','');
+ }catch(e){message('outingListMsg',`Unable to load outings: ${e.message}`,true)}
+}
+function outingShiftConflict(employeeId,date,start,end){
+ return outingShiftRows.some(s=>s.employee_id===employeeId&&s.shift_date===date&&s.status!=='cancelled'&&overlap(start,end,s.start_time,s.end_time));
+}
+async function updateOutingCandidates(){
+ const o=selectedOuting(),p=el('outingPosition').value,start=el('outingShiftStart').value,end=el('outingShiftEnd').value;
+ const old=el('outingEmployee').value;
+ const qualified=new Set(qualifications.filter(q=>q.position_id===p).map(q=>q.employee_id));
+ const matched=employees.filter(e=>qualified.has(e.id));
+ if(!o||!p){fillSelect('outingEmployee',[],'OPEN — needs coverage');el('outingEligibleHint').textContent='Save an outing and choose a position.';return}
+ // Query all date shifts, not only the month shown in the manager calendar.
+ const {data,error}=await supabase.from('shifts').select('id,employee_id,start_time,end_time').eq('shift_date',o.outing_date).neq('status','cancelled');
+ if(error){el('outingEligibleHint').textContent='Could not check assignments: '+error.message;el('outingEmployee').innerHTML='<option value="">OPEN — needs coverage</option>';return}
+ const busy=new Set((data||[]).filter(s=>overlap(start,end,s.start_time,s.end_time)).map(s=>s.employee_id).filter(Boolean));
+ const {data:off,error:offError}=await supabase.from('availability').select('employee_id,all_day,start_time,end_time').eq('unavailable_date',o.outing_date).neq('status','denied');
+ if(offError){el('outingEligibleHint').textContent='Could not check availability: '+offError.message;el('outingEmployee').innerHTML='<option value="">OPEN — needs coverage</option>';return}
+ const absent=new Set((off||[]).filter(a=>a.all_day||overlap(start,end,a.start_time,a.end_time)).map(a=>a.employee_id));
+ const candidates=matched.filter(e=>!busy.has(e.id)&&!absent.has(e.id));
+ fillSelect('outingEmployee',candidates,'OPEN — needs coverage');
+ if(candidates.some(e=>e.id===old))el('outingEmployee').value=old;
+ el('outingEligibleHint').textContent=`${candidates.length} qualified employees available for these hours; ${matched.length-candidates.length} excluded.`;
+}
+function renderOutingShifts(){
+ const o=selectedOuting();el('outingStaffTitle').textContent=o?`Outing staffing — ${o.name}`:'Outing staff assignments';
+ el('outingShiftForm').querySelectorAll('input,select,button').forEach(x=>x.disabled=!o);
+ if(!o){el('outingAssigned').innerHTML='<p class="small">Choose or save an outing to assign staff.</p>';return}
+ const rows=outingShiftRows.filter(x=>x.outing_id===o.id);
+ el('outingAssigned').innerHTML=['setup','operations','cleanup'].map(phase=>{
+  const items=rows.filter(x=>(x.outing_phase||'operations')===phase);
+  return `<section class="outing-phase"><b>${phase==='setup'?'Setup':phase==='cleanup'?'Cleanup':'During outing'}</b>${items.length?items.map(s=>`<div class="outing-shift"><b>${safe(nameFor(positions,s.position_id))}</b> · ${safe(clock(s.start_time))}–${safe(clock(s.end_time))}<div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} · ${safe(nameFor(courses,s.course_id))} <span class="meta">(${safe(s.status)})</span></div>${s.status==='draft'?`<button type="button" data-outing-delete="${safe(s.id)}">Remove draft</button>`:''}</div>`).join(''):'<p class="small">No staff assigned</p>'}</section>`;
+ }).join('');
+ el('outingAssigned').querySelectorAll('[data-outing-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this outing draft shift?'))return;const {error}=await supabase.from('shifts').delete().eq('id',b.dataset.outingDelete).eq('status','draft');if(error)message('outingShiftMsg',error.message,true);else{await loadOutings();await reload()}});
+}
+el('newOutingBtn').onclick=()=>{resetOutingEditor();updateOutingCandidates()};
+el('outingForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!managerAllowed())return;
+ const payload={name:el('outingName').value.trim(),outing_date:el('outingDate').value,course_id:el('outingCourse').value,start_time:el('outingStart').value||null,estimated_players:el('outingPlayers').value?Number(el('outingPlayers').value):null,notes:el('outingNotes').value.trim()||null};
+ if(!payload.name||!payload.outing_date||!payload.course_id)return message('outingSaveMsg','Complete the required fields.',true);
+ // Editing an event's date/course after staffing is added would strand its shifts.
+ if(activeOutingId&&outingShiftRows.some(x=>x.outing_id===activeOutingId)){const old=selectedOuting();if(old&&(old.outing_date!==payload.outing_date||old.course_id!==payload.course_id))return message('outingSaveMsg','Remove draft outing shifts before changing the event date or course. Published shifts cannot be moved here.',true)}
+ const q=activeOutingId?supabase.from('outings').update(payload).eq('id',activeOutingId):supabase.from('outings').insert(payload);
+ const {data,error}=await q.select('id').single();
+ if(error)return message('outingSaveMsg',error.message,true);
+ activeOutingId=data.id;await loadOutings();message('outingSaveMsg','Outing saved. Add setup, operations, and cleanup shifts below.');
+});
+for(const field of ['outingPosition','outingShiftStart','outingShiftEnd'])el(field).addEventListener('change',updateOutingCandidates);
+el('outingShiftForm').addEventListener('submit',async e=>{
+ e.preventDefault();const o=selectedOuting();if(!o||!managerAllowed())return;
+ const positionId=el('outingPosition').value,employeeId=el('outingEmployee').value||null,start=el('outingShiftStart').value,end=el('outingShiftEnd').value;
+ if(!positionId||start>=end)return message('outingShiftMsg','Check the position and shift hours.',true);
+ // Shared course for Pro Shop/Carts, East/West for starters/rangers.
+ const shared=courses.find(c=>c.name==='Shared');const courseId=isSharedPosition(positionId)?shared?.id:o.course_id;
+ if(!courseId)return message('outingShiftMsg','Shared course is missing. Run the shared-course setup first.',true);
+ await updateOutingCandidates();
+ if(employeeId&&!Array.from(el('outingEmployee').options).some(op=>op.value===employeeId))return message('outingShiftMsg','Employee is no longer eligible for this assignment. Choose another.',true);
+ const {error}=await supabase.from('shifts').insert({outing_id:o.id,outing_phase:el('outingPhase').value,shift_date:o.outing_date,course_id:courseId,position_id:positionId,employee_id:employeeId,start_time:start,end_time:end,status:'draft',notes:`Outing: ${o.name} (${el('outingPhase').value})`,created_by:profile.user.id});
+ if(error)return message('outingShiftMsg',error.message,true);
+ await loadOutings();await reload();message('outingShiftMsg','Outing draft shift added to the main calendar.');
+});
+
 // STAFF MANAGEMENT — manager-only UI backed by RLS-protected Supabase tables.
 const managerAllowed=()=>profile && ['admin','manager'].includes(profile.role);
 function staffMsg(text,bad=false){message('staffMessage',text,bad)}
@@ -404,17 +666,17 @@ function staffView(which){
  const privileged=managerAllowed()&&!employeePreview;
  if(which==='staff'&&!privileged)return;
  el('calendarView').classList.toggle('hidden',which!=='calendar');
- el('staffView').classList.toggle('hidden',which!=='staff');
+ el('staffView').classList.toggle('hidden',which!=='staff');el('outingsView').classList.toggle('hidden',which!=='outings');
  el('availabilityView').classList.toggle('hidden',which!=='availability');
  el('myShiftsView').classList.toggle('hidden',which!=='myshifts');
- for(const [key,tab] of [['calendar','calendarTab'],['staff','staffTab'],['availability','availabilityTab'],['myshifts','myShiftsTab']])el(tab).classList.toggle('active',which===key);
+ for(const [key,tab] of [['calendar','calendarTab'],['staff','staffTab'],['outings','outingTab'],['availability','availabilityTab'],['myshifts','myShiftsTab']])el(tab).classList.toggle('active',which===key);
  el('managerPanel').classList.toggle('hidden',!privileged);
- el('copyBtn').classList.toggle('hidden',!privileged);el('copyDayBtn').classList.toggle('hidden',!privileged);if(!privileged)el('copyDayPanel').classList.add('hidden');
- el('staffTab').classList.toggle('hidden',!privileged);
+ el('copyBtn').classList.toggle('hidden',!privileged);el('copyDayBtn').classList.toggle('hidden',!privileged);el('publishReviewBtn').classList.toggle('hidden',!privileged);if(!privileged){el('copyDayPanel').classList.add('hidden');el('publishPanel').classList.add('hidden');}
+ el('staffTab').classList.toggle('hidden',!privileged);el('outingTab').classList.toggle('hidden',!privileged);
  el('calendarTab').classList.toggle('hidden',employeePreview||profile.role==='employee');
  el('roleBadge').textContent=employeePreview?'Employee Preview':profile.role;
  el('employeePreviewBtn').textContent=employeePreview?'Return to Manager View':'Switch to Employee View';
- if(which==='staff')loadStaffManagement();
+ if(which==='staff')loadStaffManagement();if(which==='outings')loadOutings();
  if(which==='availability')loadMyAvailability();
  if(which==='myshifts')loadMyShifts();
 }
@@ -425,7 +687,7 @@ el('employeePreviewBtn').addEventListener('click',()=>{
  staffView(employeePreview?'myshifts':'calendar');
 });
 el('calendarTab').addEventListener('click',()=>staffView('calendar'));
-el('staffTab').addEventListener('click',()=>staffView('staff'));
+el('staffTab').addEventListener('click',()=>staffView('staff'));el('outingTab').addEventListener('click',()=>staffView('outings'));
 el('availabilityTab').addEventListener('click',()=>staffView('availability'));
 el('myShiftsTab').addEventListener('click',()=>staffView('myshifts'));
 function selectedStaffPositions(){return [...el('staffPositionChoices').querySelectorAll('input:checked')].map(x=>x.value)}
