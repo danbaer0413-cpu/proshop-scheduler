@@ -70,6 +70,11 @@
 @media(max-width:900px){.outing-layout{grid-template-columns:1fr}}
 @media(max-width:650px){.employee-full-day{min-height:85px;padding:3px}.employee-full-grid{gap:3px}.employee-full-line{font-size:8px;padding:2px}}
 @media print{#outingsView{display:none!important}}
+
+.edit-shift-dialog{width:min(94vw,510px);border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);padding:22px;box-shadow:0 12px 55px #0009}
+.edit-shift-dialog::backdrop{background:#02070bba}
+.edit-shift-dialog h2{margin:0}
+@media print{.edit-shift-dialog{display:none!important}}
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduler</h1><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
 <section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Set a password to sign in again later. Your invitation has already verified your email address.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
@@ -170,6 +175,20 @@
  <h2 style="margin-top:18px">Saved requests</h2><div id="savedAvail"></div><p class="small">To remove a submitted date, use Remove. A pending request cannot override an existing published shift; contact the manager if already scheduled.</p></aside></div>
 </section>
 </section></main>
+
+<!-- Manager shift reassignment dialog: preserves the original shift record -->
+<dialog id="editShiftDialog" class="edit-shift-dialog no-print" aria-labelledby="editShiftHeading">
+ <form id="editShiftForm" class="stack">
+  <div class="topline"><h2 id="editShiftHeading">Change Employee on Shift</h2><button type="button" id="closeEditShift">Close</button></div>
+  <p id="editShiftDetails" class="small"></p>
+  <label for="editShiftEmployee">New employee</label>
+  <select id="editShiftEmployee" required></select>
+  <p id="editShiftHelp" class="small"></p>
+  <p class="small">Only active, qualified and available employees are listed. The shift's date, hours, position, course and outing link are unchanged.</p>
+  <div id="editShiftError" class="status" role="status"></div>
+  <div class="controls"><button type="submit" id="saveShiftEmployee" class="primary">Save employee change</button><button type="button" id="cancelEditShift">Cancel</button></div>
+ </form>
+</dialog>
 <script type="module">
 import { supabase } from './supabase.js';
 const el=id=>document.getElementById(id), dateStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -342,6 +361,71 @@ function render(){
  el('calendar').querySelectorAll('[data-day]').forEach(btn=>btn.onclick=()=>{selected=btn.dataset.day;if(!selected.startsWith(`${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`))month=new Date(selected+'T12:00:00');render()});
  renderDay();updateEligibleEmployees();
 }
+let editingShiftRecord = null;
+const shiftEditDialog=el('editShiftDialog');
+function closeShiftEmployeeEditor(){
+ editingShiftRecord=null;
+ if(shiftEditDialog.open)shiftEditDialog.close();
+ message('editShiftError','');
+}
+el('closeEditShift').onclick=closeShiftEmployeeEditor;
+el('cancelEditShift').onclick=closeShiftEmployeeEditor;
+function openShiftEmployeeEditor(id){
+ if(!managerAllowed())return;
+ const shift=shifts.find(s=>s.id===id);
+ if(!shift||shift.status==='completed'||shift.status==='cancelled')return alert('This shift cannot be edited.');
+ editingShiftRecord=shift;
+ const position=nameFor(positions,shift.position_id);
+ const course=isSharedPosition(shift.position_id)?'Shared':nameFor(courses,shift.course_id);
+ el('editShiftDetails').textContent=`${shift.shift_date} · ${position} · ${course} · ${clock(shift.start_time)}–${clock(shift.end_time)} · Current: ${shift.employee_id?nameFor(employees,shift.employee_id,'full_name'):'OPEN'} · ${shift.status}`;
+ const qualified=new Set(qualifications.filter(q=>q.position_id===shift.position_id).map(q=>q.employee_id));
+ const eligible=employees.filter(e=>qualified.has(e.id)&&(
+  e.id===shift.employee_id || (
+   !unavailableFor(e.id,shift.shift_date,shift.start_time,shift.end_time) &&
+   !shifts.some(other=>other.id!==shift.id&&other.employee_id===e.id&&other.shift_date===shift.shift_date&&overlap(shift.start_time,shift.end_time,other.start_time,other.end_time))
+  )
+ ));
+ const select=el('editShiftEmployee');
+ select.innerHTML=`<option value="open">OPEN — unassigned</option>`+eligible.map(e=>`<option value="${safe(e.id)}">${safe(e.full_name)}${unavailableFor(e.id,shift.shift_date,shift.start_time,shift.end_time)?' (current employee; unavailable)':''}</option>`).join('');
+ select.value=shift.employee_id||'open';
+ el('editShiftHelp').textContent=`${eligible.length} qualified choices including the current assignee. Unavailable or double-booked replacement staff are hidden.`;
+ message('editShiftError','');
+ shiftEditDialog.showModal();
+}
+el('editShiftForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();
+ const shift=editingShiftRecord;
+ if(!shift||!managerAllowed())return;
+ const v=el('editShiftEmployee').value;
+ const newEmployee=v==='open'?null:v;
+ if(!v)return message('editShiftError','Choose an employee or OPEN.',true);
+ if(newEmployee===shift.employee_id)return closeShiftEmployeeEditor();
+ if(newEmployee){
+  if(!employees.some(e=>e.id===newEmployee)||!qualifications.some(q=>q.employee_id===newEmployee&&q.position_id===shift.position_id))return message('editShiftError','Employee is not active or qualified.',true);
+  if(unavailableFor(newEmployee,shift.shift_date,shift.start_time,shift.end_time))return message('editShiftError','The replacement employee requested off. Use the manager override workflow if necessary.',true);
+  if(shifts.some(s=>s.id!==shift.id&&s.employee_id===newEmployee&&s.shift_date===shift.shift_date&&overlap(shift.start_time,shift.end_time,s.start_time,s.end_time)))return message('editShiftError','The replacement employee is already scheduled at overlapping hours.',true);
+ }
+ if(shift.status==='published'&&!confirm('This is a PUBLISHED shift. Changing the employee will immediately change the published schedule. Notify affected employees separately. Continue?'))return;
+ const oldName=shift.employee_id?nameFor(employees,shift.employee_id,'full_name'):'OPEN';
+ const newName=newEmployee?nameFor(employees,newEmployee,'full_name'):'OPEN';
+ if(!confirm(`Change ${shift.shift_date} ${clock(shift.start_time)}–${clock(shift.end_time)} from ${oldName} to ${newName}?`))return;
+ const button=el('saveShiftEmployee');button.disabled=true;
+ message('editShiftError','Saving...');
+ try{
+  const updated={employee_id:newEmployee,availability_override_reason:null,availability_override_by:null,availability_override_at:null};
+  if(!newEmployee && shift.status==='published')updated.status='draft';
+  if(shift.notes?.startsWith('Needs coverage:'))updated.notes=null;
+  // Preserve shift ID, course, date, hours, position, outing linkage and status.
+  let query=supabase.from('shifts').update(updated).eq('id',shift.id);
+  query=shift.employee_id?query.eq('employee_id',shift.employee_id):query.is('employee_id',null);
+  const {data,error}=await query.select('id');
+  if(error)throw error;
+  if(!data?.length)throw new Error('Shift was changed elsewhere. Refresh and retry.');
+  closeShiftEmployeeEditor();
+  await reload();
+  message('globalMessage',`Updated shift: ${oldName} → ${newName}. ${shift.status==='published'?'Notify both employees of the change.':''}${!newEmployee&&shift.status==='published'?' The now-open shift is a draft.':''}`);
+ }catch(e){message('editShiftError',e.message||'Unable to update shift.',true)}finally{button.disabled=false;}
+});
 function renderDay(){
  const [y,m,d]=selected.split('-').map(Number);
  el('selectedDateTitle').textContent=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -350,8 +434,9 @@ function renderDay(){
  el('dayShifts').innerHTML=['shared','Both Courses','East','West'].map(group=>{
   const items=dayItems.filter(s=>group==='shared'?isSharedPosition(s.position_id):!isSharedPosition(s.position_id)&&nameFor(courses,s.course_id)===group);
   const title=group==='shared'?'SHARED — PRO SHOP / CARTS & RANGE':group==='Both Courses'?'BOTH COURSES — ROVING STAFF':`${group.toUpperCase()} COURSE`;
-  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?(s.availability_override_reason?'<span class="override-badge">⚠ MANAGER OVERRIDE</span>':'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>'):''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.availability_override_reason&&!unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<div class="override-badge">MANAGER OVERRIDE RECORDED</div>':''}${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager&&s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason?`<button data-existing-override="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Override existing shift</button>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
+  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?(s.availability_override_reason?'<span class="override-badge">⚠ MANAGER OVERRIDE</span>':'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>'):''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.availability_override_reason&&!unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<div class="override-badge">MANAGER OVERRIDE RECORDED</div>':''}${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager&&s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason?`<button data-existing-override="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Override existing shift</button>`:''}${manager&&s.status!=='completed'?`<button type="button" data-edit-shift="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Change Employee</button>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
  }).join('');
+ el('dayShifts').querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>openShiftEmployeeEditor(b.dataset.editShift));
  el('dayShifts').querySelectorAll('[data-existing-override]').forEach(b=>b.onclick=async()=>{
   const shift=shifts.find(s=>s.id===b.dataset.existingOverride);
   if(!shift||!managerAllowed())return;
