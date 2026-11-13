@@ -31,6 +31,13 @@
 @media(max-width:1000px){.my-shifts-layout{grid-template-columns:1fr}}
 @media(max-width:550px){.my-shifts-calendar{gap:3px}.my-cal-day{min-height:69px;padding:4px}.my-cal-item{font-size:9px;padding:2px}.my-cal-head{font-size:10px}.my-schedule-subtitle{font-size:14px}}
 
+/* Manager requested-off override */
+.requested-off-card{border:1px solid #805c35;background:#251f1a;border-radius:12px;padding:13px;margin-top:12px}
+.requested-off-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #62462c}
+.requested-off-row:last-child{border-bottom:0}
+.override-form{margin-top:10px;border-top:1px solid #805c35;padding-top:12px}
+.override-badge{display:inline-block;background:#6e4b13;color:#ffedb8;border-radius:5px;font-weight:800;font-size:10px;padding:2px 6px}
+@media print{#requestedOffPanel{display:none!important}}
 /* Manager publishing review */
 .publish-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}
 .publish-metric{background:#152c32;border:1px solid var(--line);padding:12px;border-radius:10px}
@@ -96,7 +103,19 @@
   <div id="copyDayMessage" role="status" class="status"></div>
  </form>
 </section>
-<h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters are assigned East or West; Rangers can also cover Both Courses. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p><button type="button" id="bothCourseRangerBtn" class="hidden" style="margin-top:7px;width:100%;border-color:#45ac9a">↔ Both Courses — Roving Ranger</button></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div></form></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
+<h2 id="print-heading" class="hidden"></h2><div class="layout"><section class="card"><div id="globalMessage" role="status" class="status no-print"></div><p class="calendar-help">Pro Shop and Carts/Range are shared across both courses. Starters are assigned East or West; Rangers can also cover Both Courses. Red shifts indicate a double-booking conflict.</p><div class="grid" id="calendar"></div></section><aside class="side no-print"><section class="card"><div class="topline"><h2 id="selectedDateTitle">Selected day</h2><span id="roleBadge" class="pill"></span></div><div id="dayShifts"></div></section><section class="card" id="managerPanel"><h2>Add a shift</h2><p class="small">Unavailable employees are removed from the list for the selected day and hours.</p><p class="small">Choose a day on the calendar, then assign an employee. Leave employee blank to create an open shift.</p><form id="shiftForm" class="stack" style="margin-top:14px"><div id="courseField"><label for="course">Course</label><select id="course" required></select><p class="small" id="courseHint">Select a position to choose the appropriate assignment.</p><button type="button" id="bothCourseRangerBtn" class="hidden" style="margin-top:7px;width:100%;border-color:#45ac9a">↔ Both Courses — Roving Ranger</button></div><div><label for="position">Position</label><select id="position" required></select></div><div><label for="employee">Employee</label><select id="employee"><option value="">Open shift (unassigned)</option></select><p class="small" id="eligibleHint" aria-live="polite">Select a position to see qualified employees.</p></div><div class="controls"><div style="flex:1"><label for="start">Start</label><input id="start" type="time" value="07:00" required></div><div style="flex:1"><label for="end">End</label><input id="end" type="time" value="13:00" required></div></div><button type="submit" class="primary">Add draft shift</button><div id="shiftMessage" role="status" class="status"></div>
+<div id="overrideChoice" class="override-form hidden">
+ <div class="topline"><b id="overridePerson"></b><button type="button" id="cancelOverrideBtn">Cancel override</button></div>
+ <p class="small">The person requested off. This will schedule them despite that request; please confirm with the employee separately.</p>
+ <label for="overrideReason">Required manager override reason</label>
+ <input id="overrideReason" maxlength="250" placeholder="e.g. Coverage needed — confirmed with employee" autocomplete="off">
+ <p class="small">The original unavailable request remains saved. Manager identity and timestamp are recorded.</p>
+</div></form>
+<div id="requestedOffPanel" class="requested-off-card" aria-label="Employees who requested off">
+ <div class="topline"><h3 style="margin:0">Requested Off — Qualified Staff</h3><span class="pill" id="requestedOffCount">0</span></div>
+ <p class="small">Matches the selected date, position and hours. Select Override to schedule one of these employees.</p>
+ <div id="requestedOffList"></div>
+</div></section><section class="card"><h2>Schedule legend</h2><p class="small">🟩 East · 🟨 West · 🟥 Double-booked · “OPEN” = unassigned</p><p class="small">New shifts remain <b>draft</b> until a manager publishes them.</p></section></aside></div></div>
 <section id="outingsView" class="hidden no-print" aria-label="Outing planning and staffing">
  <div class="toolbar"><div><h2>Outing Mode</h2><p>Plan East, West, or BOTH courses using one outing and one roster. Use existing scheduled employees without duplicating their shifts, or add new event shifts.</p></div><button class="primary" id="newOutingBtn" type="button">+ New Outing</button></div>
  <div class="outing-layout">
@@ -154,7 +173,7 @@
 <script type="module">
 import { supabase } from './supabase.js';
 const el=id=>document.getElementById(id), dateStr=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[],employeePreview=false,myShiftsMonth=new Date(today.getFullYear(),today.getMonth(),1),activeOutingId=null,outingRows=[],outingShiftRows=[];
+const today=new Date();let month=new Date(today.getFullYear(),today.getMonth(),1),selected=dateStr(today),profile=null,employees=[],courses=[],positions=[],qualifications=[],shifts=[],availability=[],printOnly=null,staffMembers=[],staffPrivate=[],editingStaffId=null,staffLoaded=false,employeeSelf=null,availabilityMonth=new Date(today.getFullYear(),today.getMonth(),1),availabilitySelection=new Set(),availabilitySelf=[],employeePreview=false,myShiftsMonth=new Date(today.getFullYear(),today.getMonth(),1),activeOutingId=null,outingRows=[],outingShiftRows=[],overrideEmployeeId=null;
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(id,s,bad=false){el(id).textContent=s;el(id).className='status '+(bad?'error':'good')}
 async function queryTable(table,fields='*',build=q=>q){const {data,error}=await build(supabase.from(table).select(fields));if(error)throw error;return data||[]}
@@ -182,21 +201,59 @@ el('activationForm').addEventListener('submit',async ev=>{
 el('signoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});
 function fillSelect(id,items,placeholder){el(id).innerHTML=(placeholder===undefined?'':`<option value="">${safe(placeholder)}</option>`)+items.map(x=>`<option value="${safe(x.id)}">${safe(x.name||x.full_name)}</option>`).join('')}
 function monthBounds(){return{from:dateStr(new Date(month.getFullYear(),month.getMonth(),1)),to:dateStr(new Date(month.getFullYear(),month.getMonth()+1,1))}}
-async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status,notes,outing_id,outing_phase',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
+async function reload(){try{message('globalMessage','Loading schedule...');const {from,to}=monthBounds();[courses,positions,employees,qualifications,shifts,availability]=await Promise.all([queryTable('courses','id,name',q=>q.eq('active',true).order('name')),queryTable('positions','id,name',q=>q.eq('active',true).order('name')),queryTable('employees','id,full_name,department',q=>q.eq('active',true).order('full_name')),queryTable('employee_positions','employee_id,position_id'),queryTable('shifts','id,shift_date,course_id,position_id,employee_id,start_time,end_time,status,notes,outing_id,outing_phase,availability_override_reason,availability_override_by,availability_override_at',q=>q.gte('shift_date',from).lt('shift_date',to).neq('status','cancelled').order('start_time')),queryTable('availability','employee_id,unavailable_date,all_day,start_time,end_time,status',q=>q.gte('unavailable_date',from).lt('unavailable_date',to).neq('status','denied'))]);fillSelect('position',positions);updateCourseSelection();updateEligibleEmployees();render();message('globalMessage','')}catch(e){message('globalMessage',`Unable to load schedule: ${e.message}`,true)}}
 function unavailableFor(employeeId,day,start,end){
  return availability.some(a=>a.employee_id===employeeId && a.unavailable_date===day &&
   (a.all_day || overlap(start,end,a.start_time,a.end_time)));
+}
+function requestedOffRows(){
+ const position=el('position').value,start=el('start').value,end=el('end').value;
+ const qualified=new Set(qualifications.filter(q=>q.position_id===position).map(q=>q.employee_id));
+ return employees.filter(e=>qualified.has(e.id)&&unavailableFor(e.id,selected,start,end));
 }
 function updateEligibleEmployees(){
  const position=el('position').value,previous=el('employee').value,start=el('start').value,end=el('end').value;
  const qualified=new Set(qualifications.filter(q=>q.position_id===position).map(q=>q.employee_id));
  const matching=employees.filter(e=>qualified.has(e.id));
- const choices=matching.filter(e=>!unavailableFor(e.id,selected,start,end));
+ const off=requestedOffRows();
+ const choices=matching.filter(e=>!off.some(a=>a.id===e.id));
  fillSelect('employee',choices,'Open shift (unassigned)');
  if(choices.some(e=>e.id===previous))el('employee').value=previous;
- const off=matching.length-choices.length;
- el('eligibleHint').textContent=position?`${choices.length} qualified employees selectable. ${off} unavailable during these hours.`:'Select a position to see qualified employees.';
+ el('eligibleHint').textContent=position?`${choices.length} qualified employees selectable. ${off.length} requested off.`:'Select a position to see qualified employees.';
+ if(overrideEmployeeId&&!off.some(e=>e.id===overrideEmployeeId))cancelOverride();
+ renderRequestedOff(off);
 }
+function renderRequestedOff(off=requestedOffRows()){
+ const panel=el('requestedOffPanel');
+ panel.classList.toggle('hidden',!managerAllowed()||employeePreview);
+ if(!managerAllowed()||employeePreview)return;
+ el('requestedOffCount').textContent=String(off.length);
+ const hasTimes=!!el('start').value&&!!el('end').value;
+ el('requestedOffList').innerHTML=!el('position').value?'<p class="small">Select a position first.</p>':!hasTimes?'<p class="small">Enter shift hours first.</p>':!off.length?'<p class="small good">No qualified employees requested off during these hours.</p>':off.map(e=>{
+  const records=availability.filter(a=>a.employee_id===e.id&&a.unavailable_date===selected&&(a.all_day||overlap(el('start').value,el('end').value,a.start_time,a.end_time)));
+  const label=records.some(a=>a.all_day)?'All day':records.map(a=>`${clock(a.start_time)}–${clock(a.end_time)}`).join(', ');
+  return `<div class="requested-off-row"><div><b>${safe(e.full_name)}</b><div class="small">Requested off: ${safe(label)}</div></div><button type="button" data-request-override="${safe(e.id)}">Manager Override</button></div>`;
+ }).join('');
+ el('requestedOffList').querySelectorAll('[data-request-override]').forEach(button=>button.onclick=()=>{
+  if(!managerAllowed())return;
+  overrideEmployeeId=button.dataset.requestOverride;
+  el('employee').value='';
+  el('overrideReason').value='';
+  el('overridePerson').textContent=`Override for ${nameFor(employees,overrideEmployeeId,'full_name')}`;
+  el('overrideChoice').classList.remove('hidden');
+  el('shiftForm').querySelector('[type="submit"]').textContent='Confirm & add override draft';
+  message('shiftMessage','Manager override selected. Enter a reason before saving.');
+  el('overrideReason').focus();
+ });
+}
+function cancelOverride(){
+ overrideEmployeeId=null;
+ el('overrideChoice').classList.add('hidden');
+ el('overrideReason').value='';
+ el('shiftForm').querySelector('[type="submit"]').textContent='Add draft shift';
+}
+el('cancelOverrideBtn').onclick=()=>{cancelOverride();updateEligibleEmployees()};
+el('employee').addEventListener('change',()=>{if(el('employee').value)cancelOverride()});
 el('start').addEventListener('change',updateEligibleEmployees);
 el('end').addEventListener('change',updateEligibleEmployees);
 el('position').addEventListener('change',()=>{updateCourseSelection();updateEligibleEmployees()});
@@ -293,12 +350,46 @@ function renderDay(){
  el('dayShifts').innerHTML=['shared','Both Courses','East','West'].map(group=>{
   const items=dayItems.filter(s=>group==='shared'?isSharedPosition(s.position_id):!isSharedPosition(s.position_id)&&nameFor(courses,s.course_id)===group);
   const title=group==='shared'?'SHARED — PRO SHOP / CARTS & RANGE':group==='Both Courses'?'BOTH COURSES — ROVING STAFF':`${group.toUpperCase()} COURSE`;
-  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>':''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
+  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?(s.availability_override_reason?'<span class="override-badge">⚠ MANAGER OVERRIDE</span>':'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>'):''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.availability_override_reason&&!unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<div class="override-badge">MANAGER OVERRIDE RECORDED</div>':''}${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager&&s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason?`<button data-existing-override="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Override existing shift</button>`:''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
  }).join('');
+ el('dayShifts').querySelectorAll('[data-existing-override]').forEach(b=>b.onclick=async()=>{
+  const shift=shifts.find(s=>s.id===b.dataset.existingOverride);
+  if(!shift||!managerAllowed())return;
+  const reason=prompt(`Override requested time off for ${nameFor(employees,shift.employee_id,'full_name')} on ${shift.shift_date}? Enter a reason (the employee should be notified separately):`);
+  if(reason===null)return;
+  if(reason.trim().length<5)return alert('A reason of at least 5 characters is required.');
+  if(!confirm('This will leave the employee requested-off record unchanged and record a manager override. Continue?'))return;
+  const {error}=await supabase.from('shifts').update({availability_override_reason:reason.trim()}).eq('id',shift.id);
+  if(error)alert(error.message);else await reload();
+ });
  el('dayShifts').querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this shift?'))return;const {error}=await supabase.from('shifts').delete().eq('id',b.dataset.remove);if(error)alert(error.message);else await reload()});
 }
 function overlap(a,b,c,d){return a<d&&c<b}
-el('shiftForm').addEventListener('submit',async e=>{e.preventDefault();const employee=el('employee').value||null,start=el('start').value,end=el('end').value,position=el('position').value,course=isSharedPosition(position)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:el('course').value;if(!course)return message('shiftMessage','Shared course is not set up. Run the included SQL in Supabase first.',true);if(end<=start)return message('shiftMessage','End time must be after start time.',true);if(employee){if(!qualifications.some(q=>q.employee_id===employee&&q.position_id===position))return message('shiftMessage','This employee is not qualified for the selected position.',true);const conflict=shifts.some(s=>s.employee_id===employee&&s.shift_date===selected&&overlap(start,end,s.start_time,s.end_time));if(conflict)return message('shiftMessage','Scheduling conflict: employee already has an overlapping shift.',true);const absent=unavailableFor(employee,selected,start,end);if(absent)return message('shiftMessage','Employee has an availability conflict.',true)}message('shiftMessage','Saving...');const {error}=await supabase.from('shifts').insert({shift_date:selected,course_id:course,position_id:position,employee_id:employee,start_time:start,end_time:end,status:'draft',created_by:profile.user.id});if(error)return message('shiftMessage',error.message,true);message('shiftMessage','Draft shift added.');await reload()});
+el('shiftForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!managerAllowed())return message('shiftMessage','Managers only.',true);
+ const employee=overrideEmployeeId||el('employee').value||null;
+ const start=el('start').value,end=el('end').value,position=el('position').value;
+ const course=isSharedPosition(position)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:el('course').value;
+ if(!course)return message('shiftMessage','A valid course is required.',true);
+ if(end<=start)return message('shiftMessage','End time must be after start time.',true);
+ if(employee){
+  if(!qualifications.some(q=>q.employee_id===employee&&q.position_id===position))return message('shiftMessage','This employee is not qualified for the selected position.',true);
+  if(shifts.some(s=>s.employee_id===employee&&s.shift_date===selected&&overlap(start,end,s.start_time,s.end_time)))return message('shiftMessage','Scheduling conflict: employee already has an overlapping shift.',true);
+ }
+ const absent=employee&&unavailableFor(employee,selected,start,end);
+ if(absent&&!overrideEmployeeId)return message('shiftMessage','Employee requested off. Use the separate Requested Off section for an override.',true);
+ if(overrideEmployeeId&&!absent)return message('shiftMessage','This request no longer conflicts with the shift hours; select the employee normally.',true);
+ const reason=overrideEmployeeId?el('overrideReason').value.trim():null;
+ if(overrideEmployeeId&&reason.length<5)return message('shiftMessage','Please enter an override reason of at least 5 characters.',true);
+ if(overrideEmployeeId&&!confirm(`Override ${nameFor(employees,employee,'full_name')}’s unavailable request for ${selected}, ${clock(start)}–${clock(end)}? The original request will remain on file. Confirm with the employee separately.`))return;
+ message('shiftMessage','Saving...');
+ const payload={shift_date:selected,course_id:course,position_id:position,employee_id:employee,start_time:start,end_time:end,status:'draft',created_by:profile.user.id};
+ if(overrideEmployeeId)payload.availability_override_reason=reason;
+ const {error}=await supabase.from('shifts').insert(payload);
+ if(error)return message('shiftMessage',error.message,true);
+ cancelOverride();await reload();message('shiftMessage',absent?'Manager override draft added. Notify the employee before publishing.':'Draft shift added.');
+});
 el('prevMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=dateStr(month);reload()};el('nextMonth').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=dateStr(month);reload()};el('todayBtn').onclick=()=>{month=new Date(today.getFullYear(),today.getMonth(),1);selected=dateStr(today);reload()};el('refreshBtn').onclick=reload;el('printBtn').onclick=()=>{printOnly=el('printDepartment').value;render();window.print()};window.addEventListener('afterprint',()=>{printOnly=null;render()});
 el('copyBtn').onclick=async()=>{if(!confirm('Copy shifts from the previous month to this month by weekday occurrence? Only empty matching slots will be added as drafts. Review conflicts before publishing.'))return;const current=monthBounds();const prev=new Date(month.getFullYear(),month.getMonth()-1,1),pStart=dateStr(prev),pEnd=current.from;try{const old=await queryTable('shifts','shift_date,course_id,position_id,employee_id,start_time,end_time',q=>q.gte('shift_date',pStart).lt('shift_date',pEnd).neq('status','cancelled'));const latest=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();const additions=[];for(const s of old){const d=new Date(`${s.shift_date}T12:00:00`);const ordinal=Math.floor((d.getDate()-1)/7);let target=new Date(month.getFullYear(),month.getMonth(),1);target.setDate(1+((d.getDay()-target.getDay()+7)%7)+ordinal*7);if(target.getMonth()!==month.getMonth())continue;const ds=dateStr(target);const targetCourse=isSharedPosition(s.position_id)?courses.find(c=>c.name.toLowerCase()==='shared')?.id:s.course_id;if(!targetCourse)throw new Error('Please run the shared-course SQL first.');if([...shifts,...additions].some(x=>x.shift_date===ds&&x.course_id===targetCourse&&x.position_id===s.position_id&&x.start_time===s.start_time&&x.end_time===s.end_time&&x.employee_id===s.employee_id))continue;const conflict=[...shifts,...additions].some(x=>x.shift_date===ds&&x.employee_id===s.employee_id&&s.employee_id&&overlap(s.start_time,s.end_time,x.start_time,x.end_time));const absent=s.employee_id&&unavailableFor(s.employee_id,ds,s.start_time,s.end_time);const reason=absent?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} is unavailable`:conflict?`Needs coverage: ${nameFor(employees,s.employee_id,'full_name')} already assigned`:null;additions.push({shift_date:ds,course_id:targetCourse,position_id:s.position_id,employee_id:conflict||absent?null:s.employee_id,start_time:s.start_time,end_time:s.end_time,status:'draft',notes:reason,created_by:profile.user.id})}if(!additions.length)return message('globalMessage','No new shifts to copy.');const {error}=await supabase.from('shifts').insert(additions);if(error)throw error;await reload();message('globalMessage',`Copied ${additions.length} draft shifts. Review all assignments.`)}catch(e){message('globalMessage',e.message,true)}};
 
@@ -337,7 +428,7 @@ function publishReview(){
   const description=`${s.shift_date} · ${nameFor(positions,s.position_id)} · ${staff?.full_name||'Unknown employee'}`;
   if(!staff)problems.push(`${description}: employee inactive or missing`);
   if(!qualifications.some(q=>q.employee_id===s.employee_id && q.position_id===s.position_id))problems.push(`${description}: not qualified`);
-  if(unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time))problems.push(`${description}: unavailable during shift`);
+  if(unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason)problems.push(`${description}: unavailable during shift (manager override required)`);
   if(selectedShifts.concat(shifts.filter(s2=>!selectedShifts.includes(s2))).some(other=>other.id!==s.id && other.employee_id===s.employee_id && other.shift_date===s.shift_date && other.status!=='cancelled' && overlap(s.start_time,s.end_time,other.start_time,other.end_time)))problems.push(`${description}: overlapping assignment`);
  }
  el('publishMonthLabel').textContent=month.toLocaleDateString('en-US',{month:'long',year:'numeric'})+' — '+publishLabel[scope];
