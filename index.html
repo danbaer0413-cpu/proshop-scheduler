@@ -3,6 +3,7 @@
 <style>
 :root{color-scheme:dark;--bg:#080f13;--panel:#111d24;--panel2:#172630;--line:#29404a;--text:#edf5f3;--muted:#a8bdc0;--green:#2cc48b;--gold:#e2b85d;--red:#ed7f7f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px;cursor:pointer}button:hover{border-color:var(--green)}button.primary{background:#167652;border-color:#239769;font-weight:700}button:disabled{opacity:.55;cursor:not-allowed}input,select{background:#0e1b23;color:var(--text);border:1px solid #3a5059;border-radius:8px;padding:10px;width:100%}label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px}.shell{max-width:1500px;margin:auto;padding:20px}.header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}.brand{display:flex;gap:12px;align-items:center}.mark{background:#136948;color:white;border-radius:12px;padding:11px 16px;font-size:23px;font-weight:900}h1{font-size:23px;line-height:1.1;margin:0}h2{font-size:18px;margin:0 0 10px}p{margin:4px 0;color:var(--muted)}.card{border:1px solid var(--line);background:var(--panel);padding:18px;border-radius:14px}.login{max-width:440px;margin:12vh auto;padding:27px}.login .stack{display:grid;gap:16px;margin:22px 0}.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.controls strong{font-size:21px;min-width:185px;text-align:center}.toolbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:13px;margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.day-head{text-align:center;color:var(--muted);font-size:12px;text-transform:uppercase;padding:10px 0;font-weight:800}.day{background:#101f27;border:1px solid #2d414a;border-radius:10px;min-height:122px;text-align:left;padding:9px;display:flex;flex-direction:column;gap:6px;overflow:hidden}.day.outside{opacity:.34}.day.today{border-color:var(--gold)}.day.selected{outline:2px solid var(--green)}.num{font-size:14px;font-weight:800}.mini{font-size:11px;background:#1b363c;border-left:3px solid #36bc8c;padding:3px 5px;border-radius:3px;white-space:normal;overflow-wrap:anywhere}.mini.west{border-color:var(--gold)}.print-label select{width:auto;min-width:175px;margin-left:5px}.print-label select{width:auto;min-width:175px;margin-left:5px}.course-section{display:flex;flex-direction:column;gap:3px;border-top:1px solid #29404a;padding-top:4px}.course-label{font-size:10px;font-weight:800;letter-spacing:.05em;color:#5de0aa}.course-label.west{color:#f0c96d}.course-label.shared{color:#7dd3fc}.mini.shared{border-color:#7dd3fc}.empty-course{font-size:10px;color:#6b838b}.conflict-tag{font-size:10px;font-weight:800;background:#743030;color:#fff;border-radius:4px;padding:2px 5px}.mini.conflict{background:#5a282b;border-color:#ff7c7c}.shift.conflict{background:#5a282b;border-color:#ff7c7c}.day-conflicts{font-size:11px;color:#ffc1c1;font-weight:800}.day{overflow:visible}.day .mini{overflow-wrap:anywhere}.calendar-help{color:var(--muted);font-size:12px;margin-bottom:10px}.meta{font-size:11px;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}.side{display:grid;gap:14px;align-content:start}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted)}.stack{display:grid;gap:10px}.notice{color:var(--gold)}.error{color:var(--red)}.good{color:var(--green)}.hidden{display:none!important}.small{font-size:12px}.pill{border:1px solid var(--line);padding:4px 8px;border-radius:99px;color:var(--muted)}.check{display:flex;align-items:center;gap:7px}.check input{width:auto}.shift{border-left:3px solid var(--green);background:#1a2c34;border-radius:4px;padding:8px;margin:6px 0}.shift.west{border-color:var(--gold)}.status{min-height:21px}.warn{background:#382924;border:1px solid #78533d;border-radius:9px;padding:9px 12px;margin:8px 0;color:#fbd7ba}.topline{display:flex;justify-content:space-between;align-items:center;gap:8px}#app{display:none}@media(max-width:1000px){.layout{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.shell{padding:10px}.card{padding:12px}.day{min-height:95px;padding:5px}.mini{font-size:9px}.grid{gap:3px}.side{grid-template-columns:1fr}.controls strong{min-width:120px}.day-head{font-size:10px}}@media print{@page{size:landscape;margin:0.22in}body{background:white;color:black}.no-print,.side,#loginCard{display:none!important}.shell{padding:0;max-width:none}.layout{display:block}.card{background:white;border:0;padding:0}.day{background:white;color:black;border:1px solid #aaa;min-height:85px;break-inside:avoid}.mini{background:#f2f2f2;color:black;border-color:#555}.course-label{color:#006044}.course-label.west{color:#795800}.conflict-tag{background:#fff;color:#900;border:1px solid #900}.day-conflicts{color:#900}.course-section{border-top-color:#aaa}.empty-course{color:#666}.mini.west{border-color:#777}.day-head{color:#333}.outside{opacity:.35}#app{display:block!important}#print-heading{display:block!important;font-size:16px;margin:0 0 6px}.day{padding:4px;gap:2px}.mini{font-size:8px;padding:1px 3px}.course-section{gap:1px;padding-top:2px}.course-label{font-size:8px}.empty-course{display:none}.day-head{padding:2px 0;font-size:9px}}
 
+
 /* Staff management */
 .navbar{display:flex;gap:9px;margin:0 0 16px}.navbtn.active{background:#167652;border-color:#239769;font-weight:700}.staff-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:16px}.staff-list{max-height:660px;overflow:auto}.staff-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 8px;border-bottom:1px solid var(--line)}.staff-item.selected{background:#1b3936}.staff-item button{flex-shrink:0}.staff-meta{font-size:11px;color:var(--muted)}.staff-inactive{opacity:.65}.staff-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.staff-quals{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:7px}.staff-quals label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:12px;font-weight:500;margin:0}.staff-quals input{width:auto;accent-color:#2cc48b}.staff-note{padding:9px 11px;background:#142b2a;border:1px solid #316057;border-radius:8px;color:#aee6d2;font-size:12px}.danger-btn{border-color:#9a5555;color:#ffc9c9}.staff-actions{display:flex;flex-wrap:wrap;gap:8px}#staffSearch{max-width:380px}@media(max-width:800px){.staff-layout{grid-template-columns:1fr}.staff-fields{grid-template-columns:1fr}}
 @media print{.navbar,#staffView,#availabilityView{display:none!important}#calendarView{display:block!important}}
@@ -85,6 +86,20 @@
 .bid-card .bid-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
 .bid-label{color:#f0c96d;font-size:11px;font-weight:700}
 @media print{#bidsView{display:none!important}}
+/* Department colors: Pro Shop blue; Cart Attendant and Range red. Preserve existing layout. */
+.mini.dept-pro,.shift.dept-pro,.my-cal-item.dept-pro,.employee-full-line.dept-pro{border-left-color:#54b9ff;background:#17344b}
+.mini.dept-carts,.shift.dept-carts,.my-cal-item.dept-carts,.employee-full-line.dept-carts{border-left-color:#ef626e;background:#48232e}
+.mini.dept-pro,.mini.dept-carts{color:#f4f9ff}
+.shift.dept-pro,.shift.dept-carts{border-left-width:4px}
+.employee-full-line.dept-pro.my-own{background:#244e69}
+.employee-full-line.dept-carts.my-own{background:#6a2835}
+.mini.conflict,.mini.dept-pro.conflict,.mini.dept-carts.conflict,.shift.conflict,.shift.dept-pro.conflict,.shift.dept-carts.conflict{background:#5a282b;border-left-color:#ff7c7c}
+.shift.unavailable,.shift.dept-pro.unavailable,.shift.dept-carts.unavailable{border-left-color:#ffb15f;background:#432b22}
+@media print{
+ .mini.dept-pro,.my-cal-item.dept-pro,.employee-full-line.dept-pro{background:#e7f3ff!important;border-left-color:#1777bd!important;color:#12212e!important}
+ .mini.dept-carts,.my-cal-item.dept-carts,.employee-full-line.dept-carts{background:#ffe9ec!important;border-left-color:#c43048!important;color:#12212e!important}
+}
+
 </style></head><body><main class="shell">
 <section id="loginCard" class="login card"><div class="brand"><div class="mark">MO</div><div><h1>Mercer Oaks Scheduling</h1><p class="small">Provided by Baer Scheduling</p><p>East & West Staff Management</p></div></div><form id="loginForm" class="stack"><div><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div><button class="primary" type="submit">Sign in with Supabase</button><div id="loginMessage" role="status" class="status"></div></form><p class="small">This version uses secure Supabase Authentication, not the old phone-number password.</p></section>
 <section id="inviteActivation" class="login card hidden"><h1>Activate your Mercer Oaks account</h1><p>Set a password to sign in again later. Your invitation has already verified your email address.</p><form id="activationForm" class="stack"><div><label for="newPassword">New password (at least 12 characters)</label><input id="newPassword" type="password" required minlength="12" autocomplete="new-password"></div><div><label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" required minlength="12" autocomplete="new-password"></div><button type="submit" class="primary">Set password &amp; enter portal</button><div id="activationMessage" class="status" role="status"></div></form></section>
@@ -202,6 +217,16 @@
   <p class="small">Only active, qualified and available employees are listed. The shift's date, hours, position, course and outing link are unchanged.</p>
   <div id="editShiftError" class="status" role="status"></div>
   <div class="controls"><button type="submit" id="saveShiftEmployee" class="primary">Save employee change</button><button type="button" id="cancelEditShift">Cancel</button></div>
+ </form>
+</dialog>
+<dialog id="editHoursDialog" class="edit-shift-dialog no-print" aria-labelledby="editHoursHeading">
+ <form id="editHoursForm" class="stack">
+  <div class="topline"><h2 id="editHoursHeading">Change Shift Hours</h2><button type="button" id="closeEditHours">Close</button></div>
+  <p id="editHoursDetails" class="small"></p>
+  <div class="controls"><div style="flex:1"><label for="editHoursStart">New start time</label><input id="editHoursStart" type="time" required></div><div style="flex:1"><label for="editHoursEnd">New end time</label><input id="editHoursEnd" type="time" required></div></div>
+  <p class="small">Changes keep the same shift, employee, position, course, and date. Published changes become visible to employees immediately. If the new hours conflict with requested time off, you must enter a fresh manager override reason.</p>
+  <div id="editHoursError" class="status" role="status" aria-live="polite"></div>
+  <div class="controls"><button type="submit" class="primary" id="saveShiftHours">Save hour changes</button><button type="button" id="cancelEditHours">Cancel</button></div>
  </form>
 </dialog>
 <script type="module">
@@ -326,6 +351,7 @@ function visibleShift(s){
  }
  return department===printOnly;
 }
+function departmentColorClass(positionId){const d=departmentForPosition(positionId);return d==='pro'?'dept-pro':d==='carts'?'dept-carts':''}
 function isSharedPosition(id){return ['pro','carts'].includes(departmentForPosition(id))}
 function updateCourseSelection(){
  const shared=isSharedPosition(el('position').value);
@@ -364,7 +390,7 @@ function shiftMarkup(s,conflicts,cssClass=''){
  const warning=managerAlerts&&unavailable
    ?(s.availability_override_reason?' ⚠ MANAGER OVERRIDE':' ⚠ OFF — REASSIGN')
    :'';
- return `<span class="mini ${cssClass} ${conflicts.has(s.id)?'conflict':''} ${managerAlerts&&unavailable?'unavailable':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''}${warning}${s.outing_id?' ⛳ OUTING':''}${s.notes?.startsWith('Needs coverage:')?' ⚠ COVERAGE':''}</span>`;
+ return `<span class="mini ${cssClass} ${departmentColorClass(s.position_id)} ${conflicts.has(s.id)?'conflict':''} ${managerAlerts&&unavailable?'unavailable':''}">${clock(s.start_time)}–${clock(s.end_time)} ${safe(nameFor(positions,s.position_id))}: ${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN')} ${conflicts.has(s.id)?'⚠':''}${warning}${s.outing_id?' ⛳ OUTING':''}${s.notes?.startsWith('Needs coverage:')?' ⚠ COVERAGE':''}</span>`;
 }
 function groupMarkup(items,group,conflicts){
  const list=items.filter(s=>visibleShift(s)&&(
@@ -462,6 +488,69 @@ el('editShiftForm').addEventListener('submit',async ev=>{
   message('globalMessage',`Updated shift: ${oldName} → ${newName}. ${shift.status==='published'?'Notify both employees of the change.':''}${!newEmployee&&shift.status==='published'?' The now-open shift is a draft.':''}`);
  }catch(e){message('editShiftError',e.message||'Unable to update shift.',true)}finally{button.disabled=false;}
 });
+// Edit the hours of an existing shift without deleting it or changing its ID.
+let editingHoursRecord=null;
+const hoursDialog=el('editHoursDialog');
+function closeShiftHoursEditor(){
+ editingHoursRecord=null;
+ if(hoursDialog.open)hoursDialog.close();
+ message('editHoursError','');
+}
+el('closeEditHours').onclick=closeShiftHoursEditor;
+el('cancelEditHours').onclick=closeShiftHoursEditor;
+function openShiftHoursEditor(id){
+ if(!managerAllowed())return;
+ const shift=shifts.find(s=>s.id===id);
+ if(!shift||['completed','cancelled'].includes(shift.status))return alert('This shift cannot be edited.');
+ if(shift.bid_visibility==='accepting_bids')return alert('Close bidding on this OPEN shift before changing its hours. Employees may have already bid on the advertised times.');
+ editingHoursRecord=shift;
+ const who=shift.employee_id?nameFor(employees,shift.employee_id,'full_name'):'OPEN';
+ el('editHoursDetails').textContent=`${shift.shift_date} · ${nameFor(positions,shift.position_id)} · ${isSharedPosition(shift.position_id)?'Shared':nameFor(courses,shift.course_id)} · ${who} · Current: ${clock(shift.start_time)}–${clock(shift.end_time)} · ${shift.status}`;
+ el('editHoursStart').value=shift.start_time.slice(0,5);
+ el('editHoursEnd').value=shift.end_time.slice(0,5);
+ message('editHoursError','');
+ hoursDialog.showModal();
+}
+el('editHoursForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const shift=editingHoursRecord;
+ if(!shift||!managerAllowed())return;
+ const start=el('editHoursStart').value,end=el('editHoursEnd').value;
+ if(!start||!end||start>=end)return message('editHoursError','End time must be after start time. Overnight shifts are not supported.',true);
+ if(start===shift.start_time.slice(0,5)&&end===shift.end_time.slice(0,5))return closeShiftHoursEditor();
+ if(shift.bid_visibility==='accepting_bids')return message('editHoursError','Close bidding before changing the advertised hours.',true);
+ if(shift.employee_id&&shifts.some(s=>s.id!==shift.id&&s.employee_id===shift.employee_id&&s.shift_date===shift.shift_date&&overlap(start,end,s.start_time,s.end_time)))
+  return message('editHoursError','This employee already has another shift that overlaps the proposed hours.',true);
+ // A time-off exception is shift-hours-specific: require a NEW, explicit override reason if new hours overlap requested time off.
+ const requestedOff=!!(shift.employee_id&&unavailableFor(shift.employee_id,shift.shift_date,start,end));
+ let overrideReason=null;
+ if(requestedOff){
+  const who=nameFor(employees,shift.employee_id,'full_name');
+  const reason=prompt(`${who} requested this time off. To change this shift to ${clock(start)}–${clock(end)}, enter a NEW manager override reason (at least 5 characters):`);
+  if(reason===null)return;
+  overrideReason=reason.trim();
+  if(overrideReason.length<5)return message('editHoursError','A manager override reason of at least 5 characters is required.',true);
+ }
+ if(shift.status==='published'&&!confirm('This shift is PUBLISHED. The new hours will immediately appear in employee schedules. Notify the employee separately. Continue?'))return;
+ if(!confirm(`Change ${shift.shift_date} hours from ${clock(shift.start_time)}–${clock(shift.end_time)} to ${clock(start)}–${clock(end)}${requestedOff?' (MANAGER OVERRIDE)':''}?`))return;
+ const button=el('saveShiftHours');button.disabled=true;
+ message('editHoursError','Saving changed hours...');
+ try{
+  const update={start_time:start,end_time:end,
+   availability_override_reason:requestedOff?overrideReason:null,
+   availability_override_by:null,
+   availability_override_at:null};
+  // Keep same record, date, course, position, employee, status, notes, outing linkage.
+  const {data,error}=await supabase.from('shifts').update(update).eq('id',shift.id)
+   .eq('start_time',shift.start_time).eq('end_time',shift.end_time).select('id');
+  if(error)throw error;
+  if(!data?.length)throw new Error('The hours were changed elsewhere. Refresh and try again.');
+  closeShiftHoursEditor();
+  await reload();
+  message('globalMessage',`✓ SHIFT HOURS UPDATED: ${shift.shift_date} · ${clock(start)}–${clock(end)}.${requestedOff?' Manager override recorded.':''}${shift.status==='published'?' Published schedule updated; notify the employee.':''}`);
+ }catch(error){message('editHoursError',error.message||'Unable to save changed hours.',true)}
+ finally{button.disabled=false;}
+});
 function renderDay(){
  const [y,m,d]=selected.split('-').map(Number);
  el('selectedDateTitle').textContent=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -470,7 +559,7 @@ function renderDay(){
  el('dayShifts').innerHTML=['shared','Both Courses','East','West'].map(group=>{
   const items=dayItems.filter(s=>group==='shared'?isSharedPosition(s.position_id):!isSharedPosition(s.position_id)&&nameFor(courses,s.course_id)===group);
   const title=group==='shared'?'SHARED — PRO SHOP / CARTS & RANGE':group==='Both Courses'?'BOTH COURSES — ROVING STAFF':`${group.toUpperCase()} COURSE`;
-  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?(s.availability_override_reason?'<span class="override-badge">⚠ MANAGER OVERRIDE</span>':'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>'):''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.availability_override_reason&&!unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<div class="override-badge">MANAGER OVERRIDE RECORDED</div>':''}${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager&&s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason?`<button data-existing-override="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Override existing shift</button>`:''}${manager&&s.status!=='completed'?`<button type="button" data-edit-shift="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Change Employee</button>`:''}${manager&&!s.employee_id&&s.status==='draft'?`<button type="button" data-bidding="${safe(s.id)}" data-accept="${s.bid_visibility==='accepting_bids'?'false':'true'}" style="margin-top:6px;padding:4px 7px">${s.bid_visibility==='accepting_bids'?'Close Bidding':'Post for Bids'}</button>`:''}${!s.employee_id&&s.bid_visibility==='accepting_bids'?'<div class="bid-label">OPEN · ACCEPTING BIDS</div>':''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
+  return `<h3 class="course-label ${group==='West'?'west':group==='shared'?'shared':''}" style="margin:12px 0 3px">${title}</h3>${items.length?items.map(s=>`<div class="shift ${group==='West'?'west':''} ${departmentColorClass(s.position_id)} ${conflicts.has(s.id)?'conflict':''} ${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'unavailable':''}"><b>${safe(nameFor(positions,s.position_id))}</b> ${conflicts.has(s.id)?'<span class="conflict-tag">DOUBLE-BOOKED</span>':''}${s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?(s.availability_override_reason?'<span class="override-badge">⚠ MANAGER OVERRIDE</span>':'<span class="flag">⚠ UNAVAILABLE — REASSIGN</span>'):''}<div>${clock(s.start_time)}–${clock(s.end_time)}</div><div>${safe(s.employee_id?nameFor(employees,s.employee_id,'full_name'):'OPEN SHIFT')} <span class="meta">(${safe(s.status)})</span></div>${s.availability_override_reason&&!unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)?'<div class="override-badge">MANAGER OVERRIDE RECORDED</div>':''}${s.outing_id?'<div class="flag">OUTING SHIFT</div>':''}${s.notes?.startsWith('Needs coverage:')?`<div class="flag">${safe(s.notes)}</div>`:''}${manager&&s.employee_id&&unavailableFor(s.employee_id,s.shift_date,s.start_time,s.end_time)&&!s.availability_override_reason?`<button data-existing-override="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Override existing shift</button>`:''}${manager&&s.status!=='completed'?`<button type="button" data-edit-shift="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Change Employee</button>`:''}${manager&&s.status!=='completed'?`<button type="button" data-edit-hours="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Change Hours</button>`:''}${manager&&!s.employee_id&&s.status==='draft'?`<button type="button" data-bidding="${safe(s.id)}" data-accept="${s.bid_visibility==='accepting_bids'?'false':'true'}" style="margin-top:6px;padding:4px 7px">${s.bid_visibility==='accepting_bids'?'Close Bidding':'Post for Bids'}</button>`:''}${!s.employee_id&&s.bid_visibility==='accepting_bids'?'<div class="bid-label">OPEN · ACCEPTING BIDS</div>':''}${manager?`<button data-remove="${safe(s.id)}" style="margin-top:6px;padding:4px 7px">Delete</button>`:''}</div>`).join(''):'<p class="small">No shifts assigned yet.</p>'}`;
  }).join('');
  el('dayShifts').querySelectorAll('[data-bidding]').forEach(b=>b.onclick=async()=>{
   const accepting=b.dataset.accept==='true';
@@ -482,6 +571,7 @@ function renderDay(){
   b.disabled=false;
  });
  el('dayShifts').querySelectorAll('[data-edit-shift]').forEach(b=>b.onclick=()=>openShiftEmployeeEditor(b.dataset.editShift));
+ el('dayShifts').querySelectorAll('[data-edit-hours]').forEach(b=>b.onclick=()=>openShiftHoursEditor(b.dataset.editHours));
  el('dayShifts').querySelectorAll('[data-existing-override]').forEach(b=>b.onclick=async()=>{
   const shift=shifts.find(s=>s.id===b.dataset.existingOverride);
   if(!shift||!managerAllowed())return;
@@ -756,7 +846,7 @@ function renderMyShiftCalendar(rows){
    const p=positions.find(p=>p.id===s.position_id)?.name||'Shift';
    const c=courses.find(c=>c.id===s.course_id)?.name||'';
    const loc=['Pro Shop','Cart Attendant','Range'].includes(p)?'Shared':c;
-   markup+=`<div class="my-cal-item ${loc==='West'?'west':''} ${s.status==='draft'?'draft':''}" title="${safe(p)} · ${safe(loc)} · ${clock(s.start_time)}–${clock(s.end_time)}">${clock(s.start_time)}–${clock(s.end_time)}<div>${safe(p)}${loc==='Shared'?'':` · ${safe(loc)}`}</div></div>`;
+   markup+=`<div class="my-cal-item ${loc==='West'?'west':''} ${departmentColorClass(s.position_id)} ${s.status==='draft'?'draft':''}" title="${safe(p)} · ${safe(loc)} · ${clock(s.start_time)}–${clock(s.end_time)}">${clock(s.start_time)}–${clock(s.end_time)}<div>${safe(p)}${loc==='Shared'?'':` · ${safe(loc)}`}</div></div>`;
   }
   markup+='</div>';
  }
@@ -788,7 +878,7 @@ async function loadFullPublishedMonth(){
     const location=isSharedPosition(s.position_id)?'Shared':course;
     const staff=nameFor(employees,s.employee_id,'full_name');
     const own=employeeSelf?.id===s.employee_id;
-    markup+=`<div class="employee-full-line ${location==='West'?'west':''} ${own?'my-own':''}">${safe(clock(s.start_time))}–${safe(clock(s.end_time))} ${safe(staff)}<div>${safe(position)}${location==='Shared'?'':' · '+safe(location)}</div></div>`;
+    markup+=`<div class="employee-full-line ${location==='West'?'west':''} ${departmentColorClass(s.position_id)} ${own?'my-own':''}">${safe(clock(s.start_time))}–${safe(clock(s.end_time))} ${safe(staff)}<div>${safe(position)}${location==='Shared'?'':' · '+safe(location)}</div></div>`;
    }
    markup+='</div>';
   }
